@@ -1141,7 +1141,7 @@
     <div class="reveal">
       <p>I hope everything comes right for you. I hope this final year is wholesome for you, and that your graduation turns out to be the best, and everything after it too. Keep going with what you're doing, because you're good at it. And one day I hope I see your name on a big movie as the director. I know you can do it.</p>
       <p class="wish">Happy 21st Birthday ✦</p>
-      <a class="skylink" href="sky.html">✦ one more thing. your sky awaits ✦</a>
+      <a class="skylink" href="sky.html">✦ one more thing. press here. your sky awaits ✦</a>
     </div>
   </section>
 </main>
@@ -1289,6 +1289,7 @@
         size: rand(1.2, 2.6)
       });
     }
+    sfx('boom');
   }
 
   let tick = 0;
@@ -1664,6 +1665,25 @@
       g2.gain.exponentialRampToValueAtTime(.001, t + .06);
       s.connect(f); f.connect(g2); g2.connect(master);
       s.start(t); s.stop(t + .07);
+    } else if (type === 'boom') {
+      const now = Date.now();
+      if (now - (sfx._lb || 0) < 300) return;
+      sfx._lb = now;
+      const o = actx.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(90, t);
+      o.frequency.exponentialRampToValueAtTime(40, t + .45);
+      const g = actx.createGain();
+      g.gain.setValueAtTime(.5, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + .5);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + .55);
+      const s = actx.createBufferSource(); s.buffer = noiseBuf;
+      const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 700;
+      const g2 = actx.createGain();
+      g2.gain.setValueAtTime(.22, t);
+      g2.gain.exponentialRampToValueAtTime(.001, t + .35);
+      s.connect(f); f.connect(g2); g2.connect(master);
+      s.start(t); s.stop(t + .4);
     } else if (type === 'crack') {
       [[0, 2600], [.045, 1900]].forEach(([dt, fr]) => {
         const s = actx.createBufferSource(); s.buffer = noiseBuf;

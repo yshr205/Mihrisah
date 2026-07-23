@@ -70,17 +70,28 @@
   @keyframes lavapulse { from { opacity: .5; } to { opacity: .95; } }
   #moonGlow {
     position: absolute;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: manipulation;
     mix-blend-mode: screen;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,205,175,.6) 0%, rgba(255,110,80,.38) 38%, rgba(210,45,45,.14) 62%, transparent 74%);
     animation: moonpulse 6.5s ease-in-out infinite alternate;
   }
   @keyframes moonpulse { from { opacity: .65; } to { opacity: 1; } }
+  #moonGlow.eclipse { animation: eclipse 2.2s ease; }
+  @keyframes eclipse {
+    0% { opacity: 1; transform: scale(1); }
+    30% { opacity: .1; transform: scale(.92); }
+    62% { opacity: 1; transform: scale(1.3); }
+    100% { opacity: .8; transform: scale(1); }
+  }
   .gnome {
     position: absolute;
     transform: translate(-50%, -100%);
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: manipulation;
   }
   .gnome svg { width: 100%; height: auto; display: block; overflow: visible; }
   @keyframes kenburns {
@@ -437,7 +448,7 @@
 
 <div id="cap">
   <h1>Your sky, Mihrişah</h1>
-  <p>Touch anywhere. The gnomes work for you tonight.<br>Hold to see a bigger surprise.</p>
+  <p>Touch anywhere. The gnomes work for you tonight.<br>And there are secrets hidden in this night. Find them.</p>
 </div>
 <a id="back" href="index.html" onclick="window.location.href='index.html'; return false;" ontouchend="window.location.href='index.html'; return false;">← back</a>
 <button id="songBtn" aria-label="toggle music">♪</button>
@@ -713,8 +724,18 @@
     if (actx) { if (actx.state !== 'running') { try { actx.resume(); } catch (e) {} } return; }
     try {
       actx = new (window.AudioContext || window.webkitAudioContext)();
+      // silent looping <audio>: makes iPhone play sound even with the mute switch on
+      const silent = document.createElement('audio');
+      silent.setAttribute('playsinline', '');
+      silent.loop = true;
+      silent.volume = 0.01;
+      silent.src = 'data:audio/wav;base64,UklGRtQEAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YbAEAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA=';
+      const sp = silent.play();
+      if (sp && sp.catch) sp.catch(() => {});
+      window._silentKeeper = silent;
+      if (actx.state !== 'running') { try { actx.resume(); } catch (e) {} }
       master = actx.createGain();
-      master.gain.value = .14;
+      master.gain.value = .18;
       master.connect(actx.destination);
     } catch (e) {}
   }
@@ -762,6 +783,36 @@
     s.start(t); s.stop(t + .45);
   }
 
+  // secret 1: the blood moon
+  let moonCool = 0;
+  const moonEl = document.getElementById('moonGlow');
+  moonEl.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    const now = Date.now();
+    if (now - moonCool < 12000) return;
+    moonCool = now;
+    moonEl.classList.remove('eclipse');
+    void moonEl.offsetWidth;
+    moonEl.classList.add('eclipse');
+    gnomes.forEach((g, i) => setTimeout(() => {
+      g.classList.remove('hop'); void g.getBoundingClientRect(); g.classList.add('hop');
+      setTimeout(() => g.classList.remove('hop'), 520);
+    }, i * 160));
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => launch(rand(W * .1, W * .9), rand(H * .08, H * .5), i % 4 === 0), 500 + i * 300);
+    }
+  });
+
+  // secret 2: the gnomes themselves
+  document.querySelectorAll('.gnome').forEach(gn => {
+    gn.addEventListener('pointerdown', e => {
+      e.stopPropagation();
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => launch(rand(W * .15, W * .85), rand(H * .1, H * .5), false), i * 240);
+      }
+    });
+  });
+
   setTimeout(() => launch(W * .3, H * .3, false), 1200);
   setTimeout(() => launch(W * .68, H * .25, false), 2100);
   setTimeout(() => launch(W * .5, H * .18, true), 3200);
@@ -807,7 +858,7 @@
     if (organStarted || !actx) return;
     organStarted = true;
     organGain = actx.createGain();
-    organGain.gain.value = organOn ? .4 : 0;
+    organGain.gain.value = organOn ? .55 : 0;
     organGain.connect(master);
     organLoop();
   }
@@ -818,11 +869,15 @@
     e.preventDefault();
     e.stopPropagation();
     ensureAudio();
-    setTimeout(startOrgan, 100);
-    organOn = !organOn;
-    if (organGain && actx) {
-      organGain.gain.cancelScheduledValues(actx.currentTime);
-      organGain.gain.setTargetAtTime(organOn ? .4 : 0, actx.currentTime, .06);
+    if (!organStarted) {
+      organOn = true;
+      setTimeout(startOrgan, 120);
+    } else {
+      organOn = !organOn;
+      if (organGain && actx) {
+        organGain.gain.cancelScheduledValues(actx.currentTime);
+        organGain.gain.setTargetAtTime(organOn ? .55 : 0, actx.currentTime, .06);
+      }
     }
     songBtn.classList.toggle('off', !organOn);
   }));
