@@ -284,6 +284,14 @@
     100% { transform: scale(1.12) translateY(-14px); opacity: 0; }
   }
   #letterBody.sealed { display: none; }
+  #letterBody > p:nth-of-type(2)::first-letter {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 3em;
+    float: left;
+    line-height: .82;
+    padding: 3px 9px 0 0;
+    color: var(--gold);
+  }
   #letterBody.shown { animation: letterin 1.2s ease; }
   @keyframes letterin {
     from { opacity: 0; transform: translateY(34px); }
@@ -496,7 +504,7 @@
   /* polaroid table */
   #ptable {
     position: relative;
-    height: min(125vw, 640px);
+    height: min(200vw, 960px);
     margin: 12px 0 34px;
   }
   .polaroid {
@@ -890,6 +898,7 @@
         <rect x="10" y="30" width="200" height="110" rx="8" fill="#171122" stroke="#f5c66a" stroke-width="1.5"/>
         <path d="M10 42 L110 106 L210 42" fill="none" stroke="#f5c66a" stroke-width="1.2" opacity=".5"/>
         <path d="M10 32 L110 96 L210 32 Q110 -10 10 32 z" fill="#221733" stroke="#f5c66a" stroke-width="1.5"/>
+        <text x="110" y="130" text-anchor="middle" font-size="19" fill="#f5c66a" font-family="'Great Vibes', cursive" opacity=".9">Mihrişah</text>
         <g class="seal">
           <circle cx="110" cy="88" r="21" fill="#a10f2b"/>
           <circle cx="110" cy="88" r="16.5" fill="none" stroke="#7c0a20" stroke-width="2"/>
@@ -929,14 +938,21 @@
       </div>
       <p>These are some of the photos we share. I have a lot more, but I couldn't upload them all because the website can't handle all of it. Go through them, move them around.</p>
       <div id="ptable">
-        <div class="polaroid" style="left:2%;top:2%;transform:rotate(-7deg)"><img loading="lazy" decoding="async" src="photos/p15.jpg" alt=""></div>
-        <div class="polaroid" style="left:52%;top:0%;transform:rotate(5deg)"><img loading="lazy" decoding="async" src="photos/p16.jpg" alt=""></div>
-        <div class="polaroid" style="left:27%;top:17%;transform:rotate(-2deg)"><img loading="lazy" decoding="async" src="photos/p17.jpg" alt=""></div>
-        <div class="polaroid" style="left:2%;top:37%;transform:rotate(6deg)"><img loading="lazy" decoding="async" src="photos/p18.jpg" alt=""></div>
-        <div class="polaroid" style="left:55%;top:33%;transform:rotate(-6deg)"><img loading="lazy" decoding="async" src="photos/p19.jpg" alt=""></div>
-        <div class="polaroid" style="left:28%;top:51%;transform:rotate(3deg)"><img loading="lazy" decoding="async" src="photos/p20.jpg" alt=""></div>
-        <div class="polaroid" style="left:4%;top:69%;transform:rotate(-4deg)"><img loading="lazy" decoding="async" src="photos/p14.jpg" alt=""></div>
-        <div class="polaroid" style="left:50%;top:65%;transform:rotate(7deg)"><img loading="lazy" decoding="async" src="photos/p21.jpg" alt=""></div>
+        <div class="polaroid" style="left:2%;top:1%;transform:rotate(-7deg)"><img loading="lazy" decoding="async" src="photos/p15.jpg" alt=""></div>
+        <div class="polaroid" style="left:52%;top:0%;transform:rotate(5deg)"><img loading="lazy" decoding="async" src="photos/q01.jpg" alt=""></div>
+        <div class="polaroid" style="left:27%;top:9%;transform:rotate(-2deg)"><img loading="lazy" decoding="async" src="photos/p16.jpg" alt=""></div>
+        <div class="polaroid" style="left:3%;top:17%;transform:rotate(6deg)"><img loading="lazy" decoding="async" src="photos/q02.jpg" alt=""></div>
+        <div class="polaroid" style="left:54%;top:15%;transform:rotate(-5deg)"><img loading="lazy" decoding="async" src="photos/p17.jpg" alt=""></div>
+        <div class="polaroid" style="left:28%;top:24%;transform:rotate(3deg)"><img loading="lazy" decoding="async" src="photos/q03.jpg" alt=""></div>
+        <div class="polaroid" style="left:2%;top:33%;transform:rotate(-4deg)"><img loading="lazy" decoding="async" src="photos/p18.jpg" alt=""></div>
+        <div class="polaroid" style="left:53%;top:31%;transform:rotate(6deg)"><img loading="lazy" decoding="async" src="photos/q04.jpg" alt=""></div>
+        <div class="polaroid" style="left:27%;top:40%;transform:rotate(-6deg)"><img loading="lazy" decoding="async" src="photos/p19.jpg" alt=""></div>
+        <div class="polaroid" style="left:3%;top:49%;transform:rotate(4deg)"><img loading="lazy" decoding="async" src="photos/q05.jpg" alt=""></div>
+        <div class="polaroid" style="left:52%;top:47%;transform:rotate(-3deg)"><img loading="lazy" decoding="async" src="photos/p20.jpg" alt=""></div>
+        <div class="polaroid" style="left:27%;top:56%;transform:rotate(5deg)"><img loading="lazy" decoding="async" src="photos/q06.jpg" alt=""></div>
+        <div class="polaroid" style="left:2%;top:65%;transform:rotate(-5deg)"><img loading="lazy" decoding="async" src="photos/p14.jpg" alt=""></div>
+        <div class="polaroid" style="left:52%;top:63%;transform:rotate(3deg)"><img loading="lazy" decoding="async" src="photos/q07.jpg" alt=""></div>
+        <div class="polaroid" style="left:27%;top:72%;transform:rotate(-2deg)"><img loading="lazy" decoding="async" src="photos/p21.jpg" alt=""></div>
       </div>
       <p class="sign">Youcef</p>
       <video class="memvideo" src="photos/memories.mp4" autoplay muted loop playsinline webkit-playsinline controls></video>
@@ -1084,8 +1100,16 @@
 (() => {
   const canvas = document.getElementById('fireworks');
   const ctx = canvas.getContext('2d');
-  let W, H;
-  const resize = () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; };
+  let W, H, DPR = 1;
+  const resize = () => {
+    W = innerWidth; H = innerHeight;
+    DPR = Math.min(window.devicePixelRatio || 1, Math.min(innerWidth, innerHeight) < 600 ? 1.7 : 2);
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  };
   addEventListener('resize', resize); resize();
 
   const colors = ['#f5c66a', '#f2a9c4', '#9d8df1', '#7fd8be', '#ff9d76', '#fff3b0'];
@@ -1187,10 +1211,13 @@
 
   const mobile = Math.min(innerWidth, innerHeight) < 600;
   function explode(x, y, color) {
+    const style = Math.random();
+    const ring = style < .16;               // clean expanding circle
+    const crackle = !ring && style < .32;   // shell that re-explodes into mini sparks
     const n = (mobile ? 40 : 60) + ((Math.random() * (mobile ? 25 : 40)) | 0);
     for (let i = 0; i < n; i++) {
-      const a = (Math.PI * 2 * i) / n + rand(-.05, .05);
-      const s = rand(1.5, 6);
+      const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
+      const s = ring ? rand(3.8, 4.4) : rand(1.5, 6);
       particles.push({
         x, y,
         vx: Math.cos(a) * s,
@@ -1198,6 +1225,8 @@
         life: rand(50, 95),
         age: 0,
         color: Math.random() < .8 ? color : '#ffffff',
+        c2: Math.random() < .3,             // white-hot core cooling into color
+        ck: crackle && Math.random() < .3,
         size: rand(1.2, 2.6)
       });
     }
@@ -1238,11 +1267,25 @@
       p.vx *= .985; p.vy = p.vy * .985 + .06;
       p.age++;
       const a = 1 - p.age / p.life;
-      if (a <= 0) { particles.splice(i, 1); continue; }
+      if (a <= 0) {
+        if (p.ck) {
+          for (let k = 0; k < 5; k++) {
+            particles.push({
+              x: p.x, y: p.y,
+              vx: rand(-1.6, 1.6), vy: rand(-1.6, 1.2),
+              life: rand(16, 30), age: 0,
+              color: Math.random() < .5 ? '#fff3b0' : p.color,
+              size: rand(.8, 1.4)
+            });
+          }
+        }
+        particles.splice(i, 1);
+        continue;
+      }
       ctx.globalAlpha = a;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
+      ctx.fillStyle = (p.c2 && p.age < p.life * .28) ? '#ffffff' : p.color;
       ctx.fill();
     }
     for (let i = trail.length - 1; i >= 0; i--) {
@@ -1370,6 +1413,7 @@
     onTap(env, () => {
       if (env.classList.contains('opening')) return;
       env.classList.add('opening');
+      setTimeout(() => sfx('crack'), 120);
       setTimeout(() => {
         env.style.display = 'none';
         letterBody.classList.remove('sealed');
@@ -1522,6 +1566,55 @@
     musicBtn.classList.toggle('off', muted);
   });
 
+  // soft sound effects (share the piano's volume + mute button)
+  let noiseBuf = null;
+  function sfx(type) {
+    if (!actx || actx.state !== 'running' || !master) return;
+    if (!noiseBuf) {
+      noiseBuf = actx.createBuffer(1, actx.sampleRate * .3 | 0, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const t = actx.currentTime;
+    if (type === 'puff') {
+      const s = actx.createBufferSource(); s.buffer = noiseBuf;
+      const f = actx.createBiquadFilter(); f.type = 'lowpass';
+      f.frequency.setValueAtTime(1400, t);
+      f.frequency.exponentialRampToValueAtTime(300, t + .18);
+      const g = actx.createGain();
+      g.gain.setValueAtTime(.5, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + .2);
+      s.connect(f); f.connect(g); g.connect(master);
+      s.start(t); s.stop(t + .22);
+    } else if (type === 'pop') {
+      const o = actx.createOscillator(); o.type = 'triangle';
+      o.frequency.setValueAtTime(320, t);
+      o.frequency.exponentialRampToValueAtTime(70, t + .09);
+      const g = actx.createGain();
+      g.gain.setValueAtTime(.9, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + .12);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + .14);
+      const s = actx.createBufferSource(); s.buffer = noiseBuf;
+      const f = actx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800;
+      const g2 = actx.createGain();
+      g2.gain.setValueAtTime(.35, t);
+      g2.gain.exponentialRampToValueAtTime(.001, t + .06);
+      s.connect(f); f.connect(g2); g2.connect(master);
+      s.start(t); s.stop(t + .07);
+    } else if (type === 'crack') {
+      [[0, 2600], [.045, 1900]].forEach(([dt, fr]) => {
+        const s = actx.createBufferSource(); s.buffer = noiseBuf;
+        const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = fr; f.Q.value = 1.2;
+        const g = actx.createGain();
+        g.gain.setValueAtTime(.7, t + dt);
+        g.gain.exponentialRampToValueAtTime(.001, t + dt + .05);
+        s.connect(f); f.connect(g); g.connect(master);
+        s.start(t + dt); s.stop(t + dt + .06);
+      });
+    }
+  }
+
   // hidden star
   const lucky = document.getElementById('luckystar');
   if (lucky) onTap(lucky, e => {
@@ -1569,6 +1662,8 @@
       dragEl = el;
       dragSX = e.clientX; dragSY = e.clientY;
       dragOX = el.offsetLeft; dragOY = el.offsetTop;
+      el._lx = e.clientX; el._ly = e.clientY;
+      el._vx = 0; el._vy = 0;
       el.style.zIndex = ++dz;
       el.style.cursor = 'grabbing';
       el.classList.add('dragging');
@@ -1580,10 +1675,47 @@
       if (dragEl !== el) return;
       el.style.left = (dragOX + e.clientX - dragSX) + 'px';
       el.style.top = (dragOY + e.clientY - dragSY) + 'px';
+      el._vx = .6 * el._vx + .4 * (e.clientX - el._lx);
+      el._vy = .6 * el._vy + .4 * (e.clientY - el._ly);
+      el._lx = e.clientX; el._ly = e.clientY;
     });
-    const drop = () => { if (dragEl === el) { dragEl = null; el.style.cursor = 'grab'; el.classList.remove('dragging'); } };
+    const drop = () => {
+      if (dragEl === el) {
+        dragEl = null;
+        el.style.cursor = 'grab';
+        el.classList.remove('dragging');
+        glidePolaroid(el);
+      }
+    };
     el.addEventListener('pointerup', drop);
     el.addEventListener('pointercancel', drop);
+  });
+
+  // released polaroids glide with momentum, staying on the table
+  function glidePolaroid(el) {
+    const tbl = document.getElementById('ptable');
+    let vx = el._vx || 0, vy = el._vy || 0;
+    if (Math.abs(vx) < 2 && Math.abs(vy) < 2) return;
+    function step() {
+      if (dragEl === el) return;
+      vx *= .92; vy *= .92;
+      if (Math.abs(vx) < .4 && Math.abs(vy) < .4) return;
+      let L = el.offsetLeft + vx, T = el.offsetTop + vy;
+      const minL = -el.offsetWidth * .5, maxL = tbl.clientWidth - el.offsetWidth * .5;
+      const minT = -el.offsetHeight * .25, maxT = tbl.clientHeight - el.offsetHeight * .5;
+      if (L < minL || L > maxL) { vx *= -.4; L = Math.max(minL, Math.min(L, maxL)); }
+      if (T < minT || T > maxT) { vy *= -.4; T = Math.max(minT, Math.min(T, maxT)); }
+      el.style.left = L + 'px';
+      el.style.top = T + 'px';
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // quietly preload the first letter photos while she reads the intro
+  ['p01', 'p03', 'p10', 'p04'].forEach(n => {
+    const im = new Image();
+    im.src = 'photos/' + n + '.jpg';
   });
 
   // cinematic reveals: elements tilt up in 3D as they enter the screen
@@ -1706,6 +1838,7 @@
   onTap(cakeDoll, () => {
     if (lit <= 0) return;
     lit--;
+    sfx('puff');
     const idx = 21 - lit - 1;
     flames[idx].forEach(el => el.classList.add('out'));
     cakeDoll.classList.remove('jump');
@@ -1796,6 +1929,7 @@
       const r = b.getBoundingClientRect();
       explode(r.left + r.width / 2, r.top + r.height * .25, colors[(Math.random() * colors.length) | 0]);
       localConfetti(r.left + r.width / 2, r.top + r.height * .25, 26);
+      sfx('pop');
       b.classList.add('popped');
       setTimeout(() => {
         b.classList.remove('popped');
