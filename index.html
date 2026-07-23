@@ -1744,20 +1744,35 @@
   // polaroid table drag
   let dragEl = null, dragSX = 0, dragSY = 0, dragOX = 0, dragOY = 0, dz = 10;
   document.querySelectorAll('.polaroid').forEach(el => {
-    el.addEventListener('pointerdown', e => {
+    const activate = () => {
+      const p = el._pend;
+      if (!p || p.active) return;
+      p.active = true;
       dragEl = el;
-      dragSX = e.clientX; dragSY = e.clientY;
-      dragOX = el.offsetLeft; dragOY = el.offsetTop;
-      el._lx = e.clientX; el._ly = e.clientY;
-      el._vx = 0; el._vy = 0;
+      dragSX = p.sx; dragSY = p.sy;
+      dragOX = p.ox; dragOY = p.oy;
       el.style.zIndex = ++dz;
       el.style.cursor = 'grabbing';
       el.classList.add('dragging');
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
+      try { el.setPointerCapture(p.id); } catch (err) {}
+    };
+    el.addEventListener('pointerdown', e => {
+      el._pend = { sx: e.clientX, sy: e.clientY, ox: el.offsetLeft, oy: el.offsetTop, active: false, id: e.pointerId };
+      el._lx = e.clientX; el._ly = e.clientY;
+      el._vx = 0; el._vy = 0;
       e.stopPropagation();
+      // mouse drags immediately; fingers first reveal their intent
+      if (e.pointerType !== 'touch') { e.preventDefault(); activate(); }
     });
     el.addEventListener('pointermove', e => {
+      const p = el._pend;
+      if (!p) return;
+      if (!p.active) {
+        const dx = e.clientX - p.sx, dy = e.clientY - p.sy;
+        if (Math.hypot(dx, dy) < 8) return;
+        if (Math.abs(dx) > Math.abs(dy) * 1.2) activate();
+        else { el._pend = null; return; } // vertical: this is a scroll, hands off
+      }
       if (dragEl !== el) return;
       el.style.left = (dragOX + e.clientX - dragSX) + 'px';
       el.style.top = (dragOY + e.clientY - dragSY) + 'px';
@@ -1766,6 +1781,7 @@
       el._lx = e.clientX; el._ly = e.clientY;
     });
     const drop = () => {
+      el._pend = null;
       if (dragEl === el) {
         dragEl = null;
         el.style.cursor = 'grab';
