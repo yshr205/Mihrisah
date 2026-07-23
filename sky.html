@@ -910,6 +910,12 @@
       const st = document.getElementById('stoast');
       st.classList.add('show');
       setTimeout(() => st.classList.remove('show'), 5500);
+      // ...and a nudge back to the first page
+      setTimeout(() => {
+        st.innerHTML = "The first page keeps secrets too.<br><span>If you haven't found them, go look.</span>";
+        st.classList.add('show');
+        setTimeout(() => st.classList.remove('show'), 6500);
+      }, 7200);
     }
   }
 
