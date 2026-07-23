@@ -272,6 +272,25 @@
   @keyframes flapL { from { transform: rotate(9deg); } to { transform: rotate(-24deg); } }
   @keyframes flapR { from { transform: rotate(-9deg); } to { transform: rotate(24deg); } }
 
+  #s21 {
+    position: fixed;
+    top: 22%;
+    left: 0; right: 0;
+    z-index: 40;
+    text-align: center;
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(1.7rem, 6.5vw, 2.8rem);
+    background: linear-gradient(120deg, #ffd98a, #ff9aa8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.9));
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  #s21 span { font-size: .55em; }
+  #s21.show { opacity: 1; }
   #cap {
     position: fixed;
     top: 4%;
@@ -340,6 +359,43 @@
     backdrop-filter: blur(4px);
   }
   #songBtn.off { opacity: .45; text-decoration: line-through; }
+
+  #secretcount {
+    position: fixed;
+    bottom: 14px;
+    left: 14px;
+    z-index: 99;
+    display: none;
+    color: #f5c66a;
+    font-family: 'Cinzel', serif;
+    font-size: .8rem;
+    padding: 9px 15px;
+    border: 1px solid rgba(245,198,106,.4);
+    border-radius: 999px;
+    background: rgba(6,3,9,.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+  #stoast {
+    position: fixed;
+    top: 30%;
+    left: 0; right: 0;
+    z-index: 45;
+    text-align: center;
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(1.6rem, 6vw, 2.5rem);
+    background: linear-gradient(120deg, #ffd98a, #ff9aa8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.9));
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  #stoast span { font-size: .6em; }
+  #stoast.show { opacity: 1; }
 
   /* cinematic vignette */
   #vig {
@@ -446,12 +502,15 @@
 <div id="grain"></div>
 <div id="vig"></div>
 
+<div id="s21">That was your 21st. Happy birthday, Mihrişah.<br><span>— the staff</span></div>
 <div id="cap">
   <h1>Your sky, Mihrişah</h1>
   <p>Touch anywhere. The gnomes work for you tonight.<br>And there are secrets hidden in this night. Find them.</p>
 </div>
 <a id="back" href="index.html" onclick="window.location.href='index.html'; return false;" ontouchend="window.location.href='index.html'; return false;">← back</a>
 <button id="songBtn" aria-label="toggle music">♪</button>
+<div id="secretcount"></div>
+<div id="stoast">You found every secret.<br><span>The staff is impressed.</span></div>
 
 <script>
 (() => {
@@ -525,25 +584,33 @@
     setTimeout(() => flash.style.opacity = 0, 70);
     setTimeout(() => flash.style.opacity = .14, 160);
     setTimeout(() => flash.style.opacity = 0, 280);
+    setTimeout(thunder, rand(1200, 2600));
     setTimeout(lightning, rand(16000, 38000));
   }
   setTimeout(lightning, 9000);
 
   function explode(x, y, big) {
-    const color = colors[(Math.random() * colors.length) | 0];
     const style = Math.random();
     const ring = style < .16;
     const crackle = !ring && style < .34;
+    const heart = !ring && !crackle && style < .46;
+    const color = heart ? '#ff5c8a' : colors[(Math.random() * colors.length) | 0];
     const base = big ? 130 : 70;
     const n = base + ((Math.random() * 40) | 0);
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
       const s = ring ? rand(4, 4.6) : rand(1.5, big ? 7.5 : 6);
+      let hvx, hvy;
+      if (heart) {
+        const t = (Math.PI * 2 * i) / n;
+        hvx = 16 * Math.pow(Math.sin(t), 3) * .3;
+        hvy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * .3;
+      }
       particles.push({
         x, y,
-        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        vx: heart ? hvx : Math.cos(a) * s, vy: heart ? hvy : Math.sin(a) * s,
         life: rand(50, big ? 120 : 95), age: 0,
-        color: Math.random() < .8 ? color : '#ffffff',
+        color: heart ? (Math.random() < .5 ? '#ff5c8a' : '#ff8fb0') : (Math.random() < .8 ? color : '#ffffff'),
         c2: Math.random() < .3,
         ck: crackle && Math.random() < .3,
         size: rand(1.2, big ? 3 : 2.6)
@@ -670,6 +737,27 @@
   frame();
 
   // reactive: tap = shell, hold = big shell, drag = shells along the whole sweep
+  let userShots = 0, s21done = false;
+  function userLaunch(x, y, big) {
+    launch(x, y, big);
+    if (s21done) return;
+    if (++userShots === 21) {
+      s21done = true;
+      setTimeout(() => {
+        gnomes.forEach((g, i) => setTimeout(() => {
+          g.classList.remove('hop'); void g.getBoundingClientRect(); g.classList.add('hop');
+          setTimeout(() => g.classList.remove('hop'), 520);
+        }, i * 120));
+        for (let i = 0; i < 6; i++) {
+          setTimeout(() => launch(W * (.14 + .144 * i), rand(H * .1, H * .35), true), 400 + i * 130);
+        }
+        const m = document.getElementById('s21');
+        m.classList.add('show');
+        setTimeout(() => m.classList.remove('show'), 7000);
+      }, 900);
+    }
+  }
+
   let pd = null, pdT = 0, swept = false, lastSweep = 0;
   addEventListener('pointerdown', e => {
     if (e.target.closest('#back')) return;
@@ -684,7 +772,7 @@
       const now = Date.now();
       if (now - lastSweep > 230) {
         lastSweep = now;
-        launch(e.clientX, Math.min(e.clientY, H * .6), false);
+        userLaunch(e.clientX, Math.min(e.clientY, H * .6), false);
       }
     }
   });
@@ -692,7 +780,8 @@
     if (!pd || e.target.closest('#back')) { pd = null; return; }
     if (!swept) {
       const big = Date.now() - pdT > 450;
-      launch(pd[0], Math.min(pd[1], H * .6), big);
+      if (big) noteSecret('hold');
+      userLaunch(pd[0], Math.min(pd[1], H * .6), big);
     }
     pd = null;
   });
@@ -750,6 +839,22 @@
     }
     return nb;
   }
+  function thunder() {
+    if (!actx || actx.state !== 'running') return;
+    const t = actx.currentTime;
+    const s = actx.createBufferSource();
+    s.buffer = noise();
+    s.loop = true;
+    const f = actx.createBiquadFilter(); f.type = 'lowpass';
+    f.frequency.setValueAtTime(140, t);
+    f.frequency.exponentialRampToValueAtTime(60, t + 2.4);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(.4, t + .25);
+    g.gain.exponentialRampToValueAtTime(.0001, t + 2.6);
+    s.connect(f); f.connect(g); g.connect(master);
+    s.start(t); s.stop(t + 2.8);
+  }
   function whoosh() {
     if (!actx || actx.state !== 'running') return;
     const t = actx.currentTime;
@@ -783,6 +888,22 @@
     s.start(t); s.stop(t + .45);
   }
 
+  // secret tracker: tells her how many she has found
+  const foundSecrets = { moon: false, gnome: false, hold: false };
+  const secretBadge = document.getElementById('secretcount');
+  function noteSecret(k) {
+    if (foundSecrets[k]) return;
+    foundSecrets[k] = true;
+    const n = Object.values(foundSecrets).filter(Boolean).length;
+    secretBadge.style.display = 'block';
+    secretBadge.textContent = 'secrets found: ' + n + '/3';
+    if (n === 3) {
+      const st = document.getElementById('stoast');
+      st.classList.add('show');
+      setTimeout(() => st.classList.remove('show'), 5500);
+    }
+  }
+
   // secret 1: the blood moon
   let moonCool = 0;
   const moonEl = document.getElementById('moonGlow');
@@ -791,6 +912,7 @@
     const now = Date.now();
     if (now - moonCool < 12000) return;
     moonCool = now;
+    noteSecret('moon');
     moonEl.classList.remove('eclipse');
     void moonEl.offsetWidth;
     moonEl.classList.add('eclipse');
@@ -807,6 +929,7 @@
   document.querySelectorAll('.gnome').forEach(gn => {
     gn.addEventListener('pointerdown', e => {
       e.stopPropagation();
+      noteSecret('gnome');
       for (let i = 0; i < 3; i++) {
         setTimeout(() => launch(rand(W * .15, W * .85), rand(H * .1, H * .5), false), i * 240);
       }
