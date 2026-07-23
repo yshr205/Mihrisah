@@ -537,7 +537,7 @@
     padding: 3.5% 3.5% 12%;
     border-radius: 3px;
     box-shadow: 0 10px 26px rgba(0,0,0,.5);
-    touch-action: none;
+    touch-action: pan-y;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -1739,55 +1739,58 @@
   // polaroid table drag
   let dragEl = null, dragSX = 0, dragSY = 0, dragOX = 0, dragOY = 0, dz = 10;
   document.querySelectorAll('.polaroid').forEach(el => {
+    let holdTimer = null;
+    const startDrag = p => {
+      dragEl = el;
+      dragSX = el._lx; dragSY = el._ly;
+      dragOX = el.offsetLeft; dragOY = el.offsetTop;
+      el.style.zIndex = ++dz;
+      el.style.cursor = 'grabbing';
+      el.classList.add('dragging');
+      try { el.setPointerCapture(p.id); } catch (err) {}
+    };
     el.addEventListener('pointerdown', e => {
-      el._pend = { sx: e.clientX, sy: e.clientY, ox: el.offsetLeft, oy: el.offsetTop, mode: null, id: e.pointerId };
+      el._pend = { sx: e.clientX, sy: e.clientY, id: e.pointerId, moved: false };
       el._lx = e.clientX; el._ly = e.clientY;
-      el._vx = 0; el._vy = 0; el._sv = 0;
-      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+      el._vx = 0; el._vy = 0;
       e.stopPropagation();
+      if (e.pointerType !== 'touch') {
+        e.preventDefault();
+        startDrag(el._pend);
+      } else {
+        // hold to pick up (like rearranging apps)
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          if (el._pend && !el._pend.moved && dragEl !== el) startDrag(el._pend);
+        }, 220);
+      }
     });
     el.addEventListener('pointermove', e => {
       const p = el._pend;
       if (!p) return;
-      if (!p.mode) {
+      if (dragEl !== el) {
         const dx = e.clientX - p.sx, dy = e.clientY - p.sy;
-        if (e.pointerType !== 'touch') p.mode = 'drag';
-        else if (Math.hypot(dx, dy) < 7) return;
-        else p.mode = Math.abs(dx) > Math.abs(dy) ? 'drag' : 'scroll';
-        if (p.mode === 'drag') {
-          dragEl = el;
-          dragSX = p.sx; dragSY = p.sy;
-          dragOX = p.ox; dragOY = p.oy;
-          el.style.zIndex = ++dz;
-          el.style.cursor = 'grabbing';
-          el.classList.add('dragging');
-        }
+        if (Math.hypot(dx, dy) > 9) {
+          p.moved = true;
+          clearTimeout(holdTimer);
+          // sideways flick = instant drag; vertical = native scroll (browser cancels us)
+          if (Math.abs(dx) > Math.abs(dy) * 1.15) startDrag(p);
+          else return;
+        } else return;
       }
-      if (p.mode === 'drag' && dragEl === el) {
-        el.style.left = (dragOX + e.clientX - dragSX) + 'px';
-        el.style.top = (dragOY + e.clientY - dragSY) + 'px';
-        el._vx = .6 * el._vx + .4 * (e.clientX - el._lx);
-        el._vy = .6 * el._vy + .4 * (e.clientY - el._ly);
-      } else if (p.mode === 'scroll') {
-        const d = e.clientY - el._ly;
-        window.scrollBy(0, -d);
-        el._sv = .7 * el._sv + .3 * d;
-      }
+      el.style.left = (dragOX + e.clientX - dragSX) + 'px';
+      el.style.top = (dragOY + e.clientY - dragSY) + 'px';
+      el._vx = .6 * el._vx + .4 * (e.clientX - el._lx);
+      el._vy = .6 * el._vy + .4 * (e.clientY - el._ly);
       el._lx = e.clientX; el._ly = e.clientY;
     });
+    // while a photo is in hand, block native scrolling completely
+    el.addEventListener('touchmove', e => {
+      if (dragEl === el) e.preventDefault();
+    }, { passive: false });
     const drop = () => {
-      const p = el._pend;
+      clearTimeout(holdTimer);
       el._pend = null;
-      if (p && p.mode === 'scroll' && Math.abs(el._sv) > 2) {
-        let v = el._sv;
-        const fling = () => {
-          v *= .95;
-          if (Math.abs(v) < .5) return;
-          window.scrollBy(0, -v);
-          requestAnimationFrame(fling);
-        };
-        requestAnimationFrame(fling);
-      }
       if (dragEl === el) {
         dragEl = null;
         el.style.cursor = 'grab';
