@@ -18,6 +18,7 @@
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   body {
     background: #050308;
@@ -759,6 +760,7 @@
   }
 
   let pd = null, pdT = 0, swept = false, lastSweep = 0;
+  const taps = [];
   addEventListener('pointerdown', e => {
     if (e.target.closest('#back')) return;
     pd = [e.clientX, e.clientY];
@@ -779,8 +781,15 @@
   addEventListener('pointerup', e => {
     if (!pd || e.target.closest('#back')) { pd = null; return; }
     if (!swept) {
-      const big = Date.now() - pdT > 450;
-      if (big) noteSecret('hold');
+      // rapid tapping wakes the big shells
+      taps.push(Date.now());
+      while (taps.length && Date.now() - taps[0] > 3000) taps.shift();
+      let big = false;
+      if (taps.length >= 8) {
+        big = true;
+        taps.length = 0;
+        noteSecret('rapid');
+      }
       userLaunch(pd[0], Math.min(pd[1], H * .6), big);
     }
     pd = null;
@@ -889,7 +898,7 @@
   }
 
   // secret tracker: tells her how many she has found
-  const foundSecrets = { moon: false, gnome: false, hold: false };
+  const foundSecrets = { moon: false, gnome: false, rapid: false };
   const secretBadge = document.getElementById('secretcount');
   function noteSecret(k) {
     if (foundSecrets[k]) return;

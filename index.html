@@ -179,6 +179,8 @@
   main { position: relative; z-index: 1; }
 
   section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -836,6 +838,8 @@
     transition: opacity .5s ease;
     animation: flicker 1.1s ease-in-out infinite alternate;
   }
+  .wishsec.asleep .flame { animation: none; }
+  .wishsec.asleep .doll, .wishsec.asleep .mhgirls, .wishsec.asleep .balloon { animation-play-state: paused; }
   @keyframes flicker { from { opacity: .85; } to { opacity: 1; } }
   .flame.out { opacity: 0 !important; animation: none; }
   #wishMsg {
@@ -1157,7 +1161,7 @@
   let W, H, DPR = 1;
   const resize = () => {
     W = innerWidth; H = innerHeight;
-    DPR = Math.min(window.devicePixelRatio || 1, Math.min(innerWidth, innerHeight) < 600 ? 1.7 : 2);
+    DPR = Math.min(window.devicePixelRatio || 1, Math.min(innerWidth, innerHeight) < 600 ? 1.35 : 2);
     canvas.width = W * DPR;
     canvas.height = H * DPR;
     canvas.style.width = W + 'px';
@@ -1178,7 +1182,7 @@
   const risers = [], textParticles = [], trail = [];
   let trailSkip = 0;
   function addTrail(x, y) {
-    if (++trailSkip % 2 || trail.length > 80) return;
+    if (++trailSkip % (mobile ? 3 : 2) || trail.length > (mobile ? 60 : 80)) return;
     trail.push({
       x: x + rand(-4, 4), y: y + rand(-4, 4),
       vx: rand(-.3, .3), vy: rand(.1, .8),
@@ -1292,14 +1296,19 @@
     sfx('boom');
   }
 
-  let tick = 0;
+  let tick = 0, skipFrame = false;
   function frame() {
+    // phones render the sky at 30fps; scrolling stays at 60
+    if (mobile) {
+      skipFrame = !skipFrame;
+      if (skipFrame) { requestAnimationFrame(frame); return; }
+    }
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(10,10,20,0.18)';
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'lighter';
 
-    if (tick++ % 40 === 0 || (Math.random() < .02)) launch();
+    if (tick++ % (mobile ? 64 : 40) === 0 || (Math.random() < (mobile ? .012 : .02))) launch();
 
     for (let i = rockets.length - 1; i >= 0; i--) {
       const r = rockets[i];
@@ -1440,11 +1449,6 @@
     requestAnimationFrame(frame);
   }
   frame();
-
-  // click / tap anywhere = extra firework
-  addEventListener('pointerdown', e => {
-    explode(e.clientX, e.clientY, colors[(Math.random() * colors.length) | 0]);
-  });
 
   // iOS-safe tap binding: handles touch directly, ignores swipes, prevents double-fire
   function onTap(el, fn) {
@@ -1814,6 +1818,15 @@
     }
   }), { threshold: .12 });
   revEls.forEach(el => obsR.observe(el));
+
+  // sleep the cake scene while it is offscreen
+  const wishSec = document.querySelector('.wishsec');
+  if (wishSec) {
+    const wobs = new IntersectionObserver(es => es.forEach(en => {
+      wishSec.classList.toggle('asleep', !en.isIntersecting);
+    }), { rootMargin: '20%' });
+    wobs.observe(wishSec);
+  }
 
   // gold progress bar
   const prog = document.createElement('div');
