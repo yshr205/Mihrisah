@@ -537,7 +537,7 @@
     padding: 3.5% 3.5% 12%;
     border-radius: 3px;
     box-shadow: 0 10px 26px rgba(0,0,0,.5);
-    touch-action: pan-y;
+    touch-action: none;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -1296,13 +1296,8 @@
     sfx('boom');
   }
 
-  let tick = 0, skipFrame = false;
+  let tick = 0;
   function frame() {
-    // phones render the sky at 30fps; scrolling stays at 60
-    if (mobile) {
-      skipFrame = !skipFrame;
-      if (skipFrame) { requestAnimationFrame(frame); return; }
-    }
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(10,10,20,0.18)';
     ctx.fillRect(0, 0, W, H);
@@ -1744,44 +1739,55 @@
   // polaroid table drag
   let dragEl = null, dragSX = 0, dragSY = 0, dragOX = 0, dragOY = 0, dz = 10;
   document.querySelectorAll('.polaroid').forEach(el => {
-    const activate = () => {
-      const p = el._pend;
-      if (!p || p.active) return;
-      p.active = true;
-      dragEl = el;
-      dragSX = p.sx; dragSY = p.sy;
-      dragOX = p.ox; dragOY = p.oy;
-      el.style.zIndex = ++dz;
-      el.style.cursor = 'grabbing';
-      el.classList.add('dragging');
-      try { el.setPointerCapture(p.id); } catch (err) {}
-    };
     el.addEventListener('pointerdown', e => {
-      el._pend = { sx: e.clientX, sy: e.clientY, ox: el.offsetLeft, oy: el.offsetTop, active: false, id: e.pointerId };
+      el._pend = { sx: e.clientX, sy: e.clientY, ox: el.offsetLeft, oy: el.offsetTop, mode: null, id: e.pointerId };
       el._lx = e.clientX; el._ly = e.clientY;
-      el._vx = 0; el._vy = 0;
+      el._vx = 0; el._vy = 0; el._sv = 0;
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
       e.stopPropagation();
-      // mouse drags immediately; fingers first reveal their intent
-      if (e.pointerType !== 'touch') { e.preventDefault(); activate(); }
     });
     el.addEventListener('pointermove', e => {
       const p = el._pend;
       if (!p) return;
-      if (!p.active) {
+      if (!p.mode) {
         const dx = e.clientX - p.sx, dy = e.clientY - p.sy;
-        if (Math.hypot(dx, dy) < 8) return;
-        if (Math.abs(dx) > Math.abs(dy) * 1.2) activate();
-        else { el._pend = null; return; } // vertical: this is a scroll, hands off
+        if (e.pointerType !== 'touch') p.mode = 'drag';
+        else if (Math.hypot(dx, dy) < 7) return;
+        else p.mode = Math.abs(dx) > Math.abs(dy) ? 'drag' : 'scroll';
+        if (p.mode === 'drag') {
+          dragEl = el;
+          dragSX = p.sx; dragSY = p.sy;
+          dragOX = p.ox; dragOY = p.oy;
+          el.style.zIndex = ++dz;
+          el.style.cursor = 'grabbing';
+          el.classList.add('dragging');
+        }
       }
-      if (dragEl !== el) return;
-      el.style.left = (dragOX + e.clientX - dragSX) + 'px';
-      el.style.top = (dragOY + e.clientY - dragSY) + 'px';
-      el._vx = .6 * el._vx + .4 * (e.clientX - el._lx);
-      el._vy = .6 * el._vy + .4 * (e.clientY - el._ly);
+      if (p.mode === 'drag' && dragEl === el) {
+        el.style.left = (dragOX + e.clientX - dragSX) + 'px';
+        el.style.top = (dragOY + e.clientY - dragSY) + 'px';
+        el._vx = .6 * el._vx + .4 * (e.clientX - el._lx);
+        el._vy = .6 * el._vy + .4 * (e.clientY - el._ly);
+      } else if (p.mode === 'scroll') {
+        const d = e.clientY - el._ly;
+        window.scrollBy(0, -d);
+        el._sv = .7 * el._sv + .3 * d;
+      }
       el._lx = e.clientX; el._ly = e.clientY;
     });
     const drop = () => {
+      const p = el._pend;
       el._pend = null;
+      if (p && p.mode === 'scroll' && Math.abs(el._sv) > 2) {
+        let v = el._sv;
+        const fling = () => {
+          v *= .95;
+          if (Math.abs(v) < .5) return;
+          window.scrollBy(0, -v);
+          requestAnimationFrame(fling);
+        };
+        requestAnimationFrame(fling);
+      }
       if (dragEl === el) {
         dragEl = null;
         el.style.cursor = 'grab';
