@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your sky 🖤</title>
+<meta name="theme-color" content="#060309">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🖤%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Cormorant+Garamond:ital@1&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #050308;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body {
+    background: #050308;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  /* the castle photo with a slow living camera */
+  #scenewrap {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    animation: kenburns 46s ease-in-out infinite alternate;
+  }
+  #extL, #extR {
+    position: absolute;
+    top: 0;
+    transform: scaleX(-1);
+    background-image: url('photos/castle.jpg');
+    background-repeat: no-repeat;
+    filter: blur(2.5px) brightness(.72);
+  }
+  #extL { background-position: left top; }
+  #extR { background-position: right top; }
+  #bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center top;
+  }
+  #grain {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: .11;
+  }
+  #lavaGlow {
+    position: absolute;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    background: linear-gradient(180deg, rgba(255,140,70,.6) 0%, rgba(255,70,45,.42) 35%, rgba(210,30,30,.22) 70%, rgba(140,15,20,.08) 100%);
+    filter: blur(7px);
+    border-radius: 40%;
+    animation: lavapulse 3.2s ease-in-out infinite alternate;
+  }
+  @keyframes lavapulse { from { opacity: .5; } to { opacity: .95; } }
+  #moonGlow {
+    position: absolute;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,205,175,.6) 0%, rgba(255,110,80,.38) 38%, rgba(210,45,45,.14) 62%, transparent 74%);
+    animation: moonpulse 6.5s ease-in-out infinite alternate;
+  }
+  @keyframes moonpulse { from { opacity: .65; } to { opacity: 1; } }
+  .gnome {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    pointer-events: none;
+  }
+  .gnome svg { width: 100%; height: auto; display: block; overflow: visible; }
+  @keyframes kenburns {
+    from { transform: scale(1.015); }
+    to { transform: scale(1.06) translateY(-.8%); }
+  }
+  #grade {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(10,4,14,.32) 0%, rgba(8,3,10,.10) 40%, rgba(5,2,8,.62) 100%),
+      radial-gradient(ellipse 70% 45% at 22% 12%, rgba(200,55,45,.12), transparent 65%);
+  }
+  #flash {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(ellipse 70% 60% at 30% 10%, rgba(205,210,255,1), transparent 70%);
+    opacity: 0;
+  }
+  .stars, .cloud, .redcloud { z-index: 2; }
+
+  /* red-lit clouds hugging the moon */
+  .redcloud {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(22px);
+    animation: fogmove 26s ease-in-out infinite alternate;
+  }
+  .r1 {
+    top: 3%; left: 1%;
+    width: 38vw; max-width: 300px;
+    height: 12vh;
+    background: radial-gradient(ellipse, rgba(170,50,40,.30), transparent 70%);
+  }
+  .r2 {
+    top: 16%; left: 13%;
+    width: 30vw; max-width: 240px;
+    height: 9vh;
+    background: radial-gradient(ellipse, rgba(150,40,38,.26), transparent 70%);
+    animation-duration: 34s;
+    animation-direction: alternate-reverse;
+  }
+
+
+  .cloud {
+    position: fixed;
+    top: 11%;
+    left: -34%;
+    width: 52vw;
+    height: 8vh;
+    background: linear-gradient(180deg, rgba(14,7,18,.0), rgba(14,7,18,.65), rgba(14,7,18,.0));
+    border-radius: 50%;
+    filter: blur(16px);
+    animation: drift 80s linear infinite;
+    pointer-events: none;
+  }
+  .cloud.c2 { top: 17%; width: 38vw; animation-duration: 110s; animation-delay: -48s; }
+  @keyframes drift { to { transform: translateX(200vw); } }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1px 1px at 12% 22%, rgba(255,235,235,.7), transparent),
+      radial-gradient(1px 1px at 34% 10%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1.4px 1.4px at 55% 30%, rgba(255,225,215,.6), transparent),
+      radial-gradient(1px 1px at 78% 44%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1px 1px at 90% 33%, rgba(255,235,225,.45), transparent),
+      radial-gradient(1.3px 1.3px at 22% 42%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1px 1px at 66% 16%, rgba(255,255,255,.55), transparent),
+      radial-gradient(1px 1px at 45% 6%, rgba(255,255,255,.5), transparent);
+    animation: twk 4.5s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes twk { from { opacity: .2; } to { opacity: .5; } }
+
+  #fx { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+
+  /* fog: one bank behind the castle, one whisper in front */
+  .fog {
+    position: fixed;
+    left: -12%;
+    right: -12%;
+    pointer-events: none;
+  }
+  .fogback {
+    bottom: 8vh;
+    height: 26vh;
+    z-index: 4;
+    background: radial-gradient(ellipse 60% 90% at 35% 60%, rgba(120,70,120,.13), transparent 70%),
+                radial-gradient(ellipse 50% 80% at 75% 50%, rgba(150,60,70,.10), transparent 70%);
+    filter: blur(6px);
+    animation: fogmove 46s ease-in-out infinite alternate;
+  }
+  .fogfront {
+    bottom: -4vh;
+    height: 20vh;
+    z-index: 7;
+    background: radial-gradient(ellipse 55% 90% at 55% 55%, rgba(80,50,95,.16), transparent 72%);
+    filter: blur(9px);
+    animation: fogmove 34s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes fogmove {
+    from { transform: translateX(-4%); }
+    to { transform: translateX(4%); }
+  }
+
+  /* phones: skip expensive blurs, the gradients are already soft */
+  @media (max-width: 760px) {
+    .fog, .redcloud, .cloud, #lavaGlow { filter: none; }
+    #grain { display: none; }
+  }
+
+  #castle {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .win { animation: winflick 2.8s ease-in-out infinite alternate; }
+  .win:nth-of-type(2n) { animation-delay: 1s; }
+  .win:nth-of-type(3n) { animation-delay: 1.8s; }
+  @keyframes winflick { from { opacity: .5; } to { opacity: 1; } }
+  .lant { animation: winflick 1.8s ease-in-out infinite alternate; }
+  .gbody.hop { animation: ghop .5s ease; }
+  .lant { transform-box: fill-box; transform-origin: center; }
+  .gbody.hop .lant { animation: lantflare .5s ease; }
+  @keyframes lantflare { 50% { transform: scale(1.9); } }
+  @keyframes ghop { 0%,100% { transform: translateY(0); } 45% { transform: translateY(-11px); } }
+  .pennant { transform-box: fill-box; transform-origin: left center; animation: wave 2.4s ease-in-out infinite alternate; }
+  @keyframes wave { from { transform: skewY(3deg); } to { transform: skewY(-4deg); } }
+  .tbat { animation: batloop 8s linear infinite; }
+  .tbat.b2 { animation-duration: 11s; animation-delay: -5s; }
+  @keyframes batloop {
+    0%   { transform: translate(-70px, 4px) scale(1); }
+    48%  { transform: translate(70px, -12px) scale(1); }
+    50%  { transform: translate(70px, -12px) scale(-1, 1); }
+    98%  { transform: translate(-70px, 4px) scale(-1, 1); }
+    100% { transform: translate(-70px, 4px) scale(1); }
+  }
+  .tbat { transform-box: fill-box; }
+  .tflap { transform-box: fill-box; transform-origin: center; animation: tflap .28s ease-in-out infinite alternate; }
+  @keyframes tflap { from { transform: scaleY(1); } to { transform: scaleY(.55); } }
+
+  .flybat {
+    position: fixed;
+    left: -70px;
+    width: 46px;
+    z-index: 6;
+    pointer-events: none;
+    animation: batfly linear forwards;
+  }
+  @keyframes batfly {
+    from { transform: translateX(0) translateY(0); }
+    to { transform: translateX(130vw) translateY(-7vh); }
+  }
+  .flybat .bob { animation: batbob 1.2s ease-in-out infinite alternate; }
+  @keyframes batbob {
+    from { transform: translateY(0) rotate(3deg); }
+    to { transform: translateY(-16px) rotate(-4deg); }
+  }
+  .flybat .wingL {
+    transform-box: fill-box;
+    transform-origin: right center;
+    animation: flapL .3s ease-in-out infinite alternate;
+  }
+  .flybat .wingR {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: flapR .3s ease-in-out infinite alternate;
+  }
+  @keyframes flapL { from { transform: rotate(9deg); } to { transform: rotate(-24deg); } }
+  @keyframes flapR { from { transform: rotate(-9deg); } to { transform: rotate(24deg); } }
+
+  #cap {
+    position: fixed;
+    top: 4%;
+    right: 5%;
+    max-width: 62%;
+    z-index: 8;
+    text-align: right;
+    color: #efe6ee;
+    pointer-events: none;
+    animation: capfade 2s ease 8s forwards;
+  }
+  #cap h1 {
+    font-family: 'Great Vibes', cursive;
+    font-weight: normal;
+    font-size: clamp(2rem, 8vw, 3.4rem);
+    background: linear-gradient(120deg, #ffd98a, #ff9aa8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.9)) drop-shadow(0 0 14px rgba(0,0,0,.7));
+  }
+  #cap p {
+    margin-top: 6px;
+    font-style: italic;
+    font-size: clamp(.95rem, 3.2vw, 1.15rem);
+    color: rgba(255,246,250,.95);
+    text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 10px rgba(0,0,0,.8);
+  }
+  @keyframes capfade { to { opacity: .55; } }
+
+  #back {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 99;
+    pointer-events: auto;
+    touch-action: manipulation;
+    color: rgba(245,198,106,.85);
+    font-family: 'Cinzel', serif;
+    font-size: .95rem;
+    text-decoration: none;
+    padding: 12px 20px;
+    border: 1px solid rgba(245,198,106,.4);
+    border-radius: 999px;
+    background: rgba(6,3,9,.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+  }
+
+  #songBtn {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 99;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(245,198,106,.5);
+    background: rgba(6,3,9,.65);
+    color: #f5c66a;
+    font-size: 1.3rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  #songBtn.off { opacity: .45; text-decoration: line-through; }
+
+  /* cinematic vignette */
+  #vig {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.5) 100%);
+  }
+</style>
+</head>
+<body>
+
+<div id="scenewrap">
+  <div id="extL"></div>
+  <div id="extR"></div>
+  <img id="bg" src="photos/castle.jpg" alt="">
+  <div id="moonGlow"></div>
+  <div id="lavaGlow"></div>
+  <div class="gnome" data-anchor=".303,.278"><svg viewBox="-19 -52 38 58" xmlns="http://www.w3.org/2000/svg"><g class="gbody" data-g="1">
+    <ellipse cx="0" cy="1.5" rx="16" ry="3.5" fill="#000" opacity=".45"/>
+    <rect x="-7" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <rect x="1.6" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <path d="M-16 -1 L0 -34 L16 -1 z" fill="#0a0410"/>
+    <path d="M-16 -1 L-9.5 -1 L-4 -13 z" fill="#7a0e1e"/>
+    <path d="M16 -1 L9.5 -1 L4 -13 z" fill="#7a0e1e"/>
+    <path d="M0 -34 L-8 -24 L-5 -22 z" fill="#12081a"/>
+    <path d="M0 -34 L8 -24 L5 -22 z" fill="#12081a"/>
+    <path d="M-8.5 -16 Q-6 -6 0 -2 Q6 -6 8.5 -16 L6.5 -25 Q0 -20.5 -6.5 -25 z" fill="#8a8494"/>
+    <path d="M-4 -18 Q-2 -10 0 -5 M4 -18 Q2 -10 0 -5" stroke="#6e6878" stroke-width="1" fill="none"/>
+    <path d="M-5.5 -22.5 Q0 -18.5 5.5 -22.5 Q3 -19.5 0 -19.8 Q-3 -19.5 -5.5 -22.5 z" fill="#9a94a6"/>
+    <path d="M-2.6 -19.6 l1.6 4.2 l1.6 -4.2 z" fill="#efe9f2"/>
+    <circle cx="0" cy="-24.5" r="3.6" fill="#e0294a"/>
+    <circle cx="-1.2" cy="-25.6" r="1.1" fill="#ff7d95" opacity=".8"/>
+    <rect x="-11" y="-30" width="22" height="3.6" rx="1.8" fill="#08050c"/>
+    <path d="M-7 -30 L-6.2 -47 Q0 -49 6.2 -47 L7 -30 z" fill="#08050c"/>
+    <rect x="-6.8" y="-34.5" width="13.6" height="3.6" fill="#1c1024"/>
+    <rect x="-1.5" y="-34.9" width="3" height="4.4" fill="#f5c66a" opacity=".8"/>
+    <path d="M8 -14 Q12 -13 13 -10" stroke="#0a0510" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="14" cy="-9" r="6.5" fill="#ffb45e" opacity=".18"/>
+    <circle cx="14" cy="-9" r="3.4" fill="#ffb45e" class="lant"/>
+    <rect x="12.8" y="-6" width="2.4" height="6" fill="#0e0716"/>
+  </g></svg></div>
+  <div class="gnome" data-anchor=".472,.098"><svg viewBox="-19 -52 38 58" xmlns="http://www.w3.org/2000/svg"><g class="gbody" data-g="1">
+    <ellipse cx="0" cy="1.5" rx="16" ry="3.5" fill="#000" opacity=".45"/>
+    <rect x="-7" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <rect x="1.6" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <path d="M-16 -1 L0 -34 L16 -1 z" fill="#0a0410"/>
+    <path d="M-16 -1 L-9.5 -1 L-4 -13 z" fill="#7a0e1e"/>
+    <path d="M16 -1 L9.5 -1 L4 -13 z" fill="#7a0e1e"/>
+    <path d="M0 -34 L-8 -24 L-5 -22 z" fill="#12081a"/>
+    <path d="M0 -34 L8 -24 L5 -22 z" fill="#12081a"/>
+    <path d="M-8.5 -16 Q-6 -6 0 -2 Q6 -6 8.5 -16 L6.5 -25 Q0 -20.5 -6.5 -25 z" fill="#8a8494"/>
+    <path d="M-4 -18 Q-2 -10 0 -5 M4 -18 Q2 -10 0 -5" stroke="#6e6878" stroke-width="1" fill="none"/>
+    <path d="M-5.5 -22.5 Q0 -18.5 5.5 -22.5 Q3 -19.5 0 -19.8 Q-3 -19.5 -5.5 -22.5 z" fill="#9a94a6"/>
+    <path d="M-2.6 -19.6 l1.6 4.2 l1.6 -4.2 z" fill="#efe9f2"/>
+    <circle cx="0" cy="-24.5" r="3.6" fill="#e0294a"/>
+    <circle cx="-1.2" cy="-25.6" r="1.1" fill="#ff7d95" opacity=".8"/>
+    <rect x="-11" y="-30" width="22" height="3.6" rx="1.8" fill="#08050c"/>
+    <path d="M-7 -30 L-6.2 -47 Q0 -49 6.2 -47 L7 -30 z" fill="#08050c"/>
+    <rect x="-6.8" y="-34.5" width="13.6" height="3.6" fill="#1c1024"/>
+    <rect x="-1.5" y="-34.9" width="3" height="4.4" fill="#f5c66a" opacity=".8"/>
+    <path d="M-8 -14 Q-12 -13 -13 -10" stroke="#0a0510" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="-14" cy="-9" r="6.5" fill="#ffb45e" opacity=".18"/>
+    <circle cx="-14" cy="-9" r="3.4" fill="#ffb45e" class="lant"/>
+    <rect x="-15.2" y="-6" width="2.4" height="6" fill="#0e0716"/>
+  </g></svg></div>
+  <div class="gnome" data-anchor=".74,.152"><svg viewBox="-19 -52 38 58" xmlns="http://www.w3.org/2000/svg"><g class="gbody" data-g="1">
+    <ellipse cx="0" cy="1.5" rx="16" ry="3.5" fill="#000" opacity=".45"/>
+    <rect x="-7" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <rect x="1.6" y="-3.4" width="5.4" height="3.8" rx="1.6" fill="#120a18"/>
+    <path d="M-16 -1 L0 -34 L16 -1 z" fill="#0a0410"/>
+    <path d="M-16 -1 L-9.5 -1 L-4 -13 z" fill="#7a0e1e"/>
+    <path d="M16 -1 L9.5 -1 L4 -13 z" fill="#7a0e1e"/>
+    <path d="M0 -34 L-8 -24 L-5 -22 z" fill="#12081a"/>
+    <path d="M0 -34 L8 -24 L5 -22 z" fill="#12081a"/>
+    <path d="M-8.5 -16 Q-6 -6 0 -2 Q6 -6 8.5 -16 L6.5 -25 Q0 -20.5 -6.5 -25 z" fill="#8a8494"/>
+    <path d="M-4 -18 Q-2 -10 0 -5 M4 -18 Q2 -10 0 -5" stroke="#6e6878" stroke-width="1" fill="none"/>
+    <path d="M-5.5 -22.5 Q0 -18.5 5.5 -22.5 Q3 -19.5 0 -19.8 Q-3 -19.5 -5.5 -22.5 z" fill="#9a94a6"/>
+    <path d="M-2.6 -19.6 l1.6 4.2 l1.6 -4.2 z" fill="#efe9f2"/>
+    <circle cx="0" cy="-24.5" r="3.6" fill="#e0294a"/>
+    <circle cx="-1.2" cy="-25.6" r="1.1" fill="#ff7d95" opacity=".8"/>
+    <rect x="-11" y="-30" width="22" height="3.6" rx="1.8" fill="#08050c"/>
+    <path d="M-7 -30 L-6.2 -47 Q0 -49 6.2 -47 L7 -30 z" fill="#08050c"/>
+    <rect x="-6.8" y="-34.5" width="13.6" height="3.6" fill="#1c1024"/>
+    <rect x="-1.5" y="-34.9" width="3" height="4.4" fill="#f5c66a" opacity=".8"/>
+    <path d="M8 -14 Q12 -13 13 -10" stroke="#0a0510" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="14" cy="-9" r="6.5" fill="#ffb45e" opacity=".18"/>
+    <circle cx="14" cy="-9" r="3.4" fill="#ffb45e" class="lant"/>
+    <rect x="12.8" y="-6" width="2.4" height="6" fill="#0e0716"/>
+  </g></svg></div>
+</div>
+<div id="grade"></div>
+<div id="flash"></div>
+<div class="stars"></div>
+<div class="redcloud r1"></div>
+<div class="redcloud r2"></div>
+<div class="cloud"></div>
+<div class="cloud c2"></div>
+<div class="fog fogback"></div>
+<canvas id="fx"></canvas>
+
+<div class="fog fogfront"></div>
+<div id="grain"></div>
+<div id="vig"></div>
+
+<div id="cap">
+  <h1>Your sky, Mihrişah</h1>
+  <p>Touch anywhere. The gnomes work for you tonight.<br>Hold to see a bigger surprise.</p>
+</div>
+<a id="back" href="index.html" onclick="window.location.href='index.html'; return false;" ontouchend="window.location.href='index.html'; return false;">← back</a>
+<button id="songBtn" aria-label="toggle music">♪</button>
+
+<script>
+(() => {
+  const cv = document.getElementById('fx');
+  const ctx = cv.getContext('2d');
+  let W, H, DPR = 1;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  // pin the gnomes to exact spots on the castle image, on every screen size
+  const IMW = 690, IMH = 1500;
+  function placeGnomes() {
+    const scale = Math.min(innerWidth / IMW, innerHeight / IMH); // image shown whole, sharp
+    const dw = IMW * scale, dh = IMH * scale;
+    const ox = (innerWidth - dw) / 2, oy = 0; // image anchored to top
+    const gh = Math.max(30, Math.min(72, dh * .042));
+    document.querySelectorAll('.gnome').forEach(el => {
+      const [fx, fy] = el.dataset.anchor.split(',').map(Number);
+      el.style.left = (ox + fx * dw) + 'px';
+      el.style.top = (oy + fy * dh) + 'px';
+      el.style.width = (gh * 38 / 58) + 'px';
+    });
+    // mirrored side extensions: the painting continues outward instead of black bars
+    const eL = document.getElementById('extL'), eR = document.getElementById('extR');
+    const gap = Math.max(0, Math.ceil(ox));
+    [eL, eR].forEach(el => {
+      el.style.width = (gap + 1) + 'px';
+      el.style.height = dh + 'px';
+      el.style.backgroundSize = dw + 'px ' + dh + 'px';
+    });
+    eL.style.left = '0px';
+    eR.style.left = (ox + dw - 1) + 'px';
+    // lava fall glow (tracks the painted fall)
+    const lv = document.getElementById('lavaGlow');
+    lv.style.left = (ox + .455 * dw) + 'px';
+    lv.style.top = (.33 * dh) + 'px';
+    lv.style.width = (.075 * dw) + 'px';
+    lv.style.height = (.63 * dh) + 'px';
+    // blood moon glow
+    const mg = document.getElementById('moonGlow');
+    const ms = .34 * dw;
+    mg.style.left = (ox + .195 * dw - ms / 2) + 'px';
+    mg.style.top = (.105 * dh - ms / 2) + 'px';
+    mg.style.width = ms + 'px';
+    mg.style.height = ms + 'px';
+    window._lavaX = ox + .49 * dw;
+  }
+  const resize = () => {
+    W = innerWidth; H = innerHeight;
+    DPR = Math.min(window.devicePixelRatio || 1, Math.min(W, H) < 600 ? 1.7 : 2);
+    cv.width = W * DPR; cv.height = H * DPR;
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    placeGnomes();
+  };
+  addEventListener('resize', resize); resize();
+
+  // hardened back button
+  const back = document.getElementById('back');
+  ['click', 'touchend'].forEach(ev => back.addEventListener(ev, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    location.href = 'index.html';
+  }));
+
+  const colors = ['#e63946', '#c1121f', '#ff6b6b', '#8a0f22', '#f5c66a', '#9d4edd'];
+  const rockets = [], particles = [], embers = [];
+
+  // distant lightning behind the clouds, every so often
+  const flash = document.getElementById('flash');
+  function lightning() {
+    flash.style.opacity = .1;
+    setTimeout(() => flash.style.opacity = 0, 70);
+    setTimeout(() => flash.style.opacity = .14, 160);
+    setTimeout(() => flash.style.opacity = 0, 280);
+    setTimeout(lightning, rand(16000, 38000));
+  }
+  setTimeout(lightning, 9000);
+
+  function explode(x, y, big) {
+    const color = colors[(Math.random() * colors.length) | 0];
+    const style = Math.random();
+    const ring = style < .16;
+    const crackle = !ring && style < .34;
+    const base = big ? 130 : 70;
+    const n = base + ((Math.random() * 40) | 0);
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
+      const s = ring ? rand(4, 4.6) : rand(1.5, big ? 7.5 : 6);
+      particles.push({
+        x, y,
+        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        life: rand(50, big ? 120 : 95), age: 0,
+        color: Math.random() < .8 ? color : '#ffffff',
+        c2: Math.random() < .3,
+        ck: crackle && Math.random() < .3,
+        size: rand(1.2, big ? 3 : 2.6)
+      });
+    }
+    boom(big);
+  }
+
+  const gnomes = [...document.querySelectorAll('[data-g]')];
+  function gnomePos(g) {
+    const r = g.getBoundingClientRect();
+    return [r.left + r.width / 2, r.top];
+  }
+  function nearestGnome(x) {
+    let best = gnomes[0], bd = 1e9;
+    gnomes.forEach(g => {
+      const d = Math.abs(gnomePos(g)[0] - x);
+      if (d < bd) { bd = d; best = g; }
+    });
+    return best;
+  }
+
+  function launch(tx, ty, big) {
+    const g = nearestGnome(tx);
+    g.classList.remove('hop');
+    void g.getBoundingClientRect();
+    g.classList.add('hop');
+    setTimeout(() => g.classList.remove('hop'), 520);
+    const [gx, gy] = gnomePos(g);
+    rockets.push({
+      sx: gx, sy: gy - 6, tx, ty,
+      age: 0, dur: rand(34, 44), big,
+      color: colors[(Math.random() * colors.length) | 0], trail: []
+    });
+    whoosh();
+  }
+
+  let tick = 0;
+  function frame() {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(5,3,8,0.18)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+
+    if (++tick % 210 === 0) launch(rand(W * .12, W * .88), rand(H * .1, H * .48), false);
+
+    // embers rising from the depths
+    if (tick % 16 === 0 && embers.length < 42) {
+      const lx = window._lavaX || W / 2;
+      embers.push({
+        x: Math.random() < .65 ? lx + rand(-28, 28) : rand(0, W), y: H + 6,
+        vx: rand(-.25, .25), vy: rand(-.9, -.45),
+        age: 0, life: rand(200, 330), s: rand(.8, 1.9)
+      });
+    }
+    for (let i = embers.length - 1; i >= 0; i--) {
+      const em = embers[i];
+      em.age++;
+      if (em.age >= em.life) { embers.splice(i, 1); continue; }
+      em.x += em.vx + Math.sin(em.age * .03) * .3;
+      em.y += em.vy;
+      ctx.globalAlpha = Math.sin(Math.PI * em.age / em.life) * .5;
+      ctx.beginPath();
+      ctx.arc(em.x, em.y, em.s, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffb066';
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      r.age++;
+      const t = r.age / r.dur;
+      const x = r.sx + (r.tx - r.sx) * t;
+      const y = r.sy + (r.ty - r.sy) * (t * t * (3 - 2 * t)) - Math.sin(Math.PI * t) * 30;
+      r.trail.push({ x, y });
+      if (r.trail.length > 8) r.trail.shift();
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = r.color;
+      ctx.fill();
+      r.trail.forEach((p, j) => {
+        ctx.globalAlpha = j / r.trail.length * .5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2);
+        ctx.fillStyle = r.color;
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      if (r.age >= r.dur) { explode(r.tx, r.ty, r.big); rockets.splice(i, 1); }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= .985; p.vy = p.vy * .985 + .06;
+      p.age++;
+      const a = 1 - p.age / p.life;
+      if (a <= 0) {
+        if (p.ck) {
+          for (let k = 0; k < 5; k++) {
+            particles.push({
+              x: p.x, y: p.y,
+              vx: rand(-1.6, 1.6), vy: rand(-1.6, 1.2),
+              life: rand(16, 30), age: 0,
+              color: Math.random() < .5 ? '#f5c66a' : p.color,
+              size: rand(.8, 1.4)
+            });
+          }
+        }
+        particles.splice(i, 1);
+        continue;
+      }
+      ctx.globalAlpha = a;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = (p.c2 && p.age < p.life * .28) ? '#ffffff' : p.color;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  // reactive: tap = shell, hold = big shell, drag = shells along the whole sweep
+  let pd = null, pdT = 0, swept = false, lastSweep = 0;
+  addEventListener('pointerdown', e => {
+    if (e.target.closest('#back')) return;
+    pd = [e.clientX, e.clientY];
+    pdT = Date.now();
+    swept = false;
+  });
+  addEventListener('pointermove', e => {
+    if (!pd) return;
+    if (Math.hypot(e.clientX - pd[0], e.clientY - pd[1]) > 26) {
+      swept = true;
+      const now = Date.now();
+      if (now - lastSweep > 230) {
+        lastSweep = now;
+        launch(e.clientX, Math.min(e.clientY, H * .6), false);
+      }
+    }
+  });
+  addEventListener('pointerup', e => {
+    if (!pd || e.target.closest('#back')) { pd = null; return; }
+    if (!swept) {
+      const big = Date.now() - pdT > 450;
+      launch(pd[0], Math.min(pd[1], H * .6), big);
+    }
+    pd = null;
+  });
+
+  // bats crossing the vampire sky
+  function spawnBat() {
+    const b = document.createElement('div');
+    b.className = 'flybat';
+    b.style.top = rand(6, 34) + 'vh';
+    b.style.width = rand(30, 52) + 'px';
+    const d = rand(11, 17);
+    b.style.animationDuration = d + 's';
+    b.innerHTML = '<div class="bob"><svg viewBox="0 0 100 44" xmlns="http://www.w3.org/2000/svg">' +
+      '<g class="wingL"><path d="M46 20 C40 10 30 5 18 6 C10 7 4 10 2 14 C8 13 12 15 14 18 C9 20 7 23 7 27 C12 25 16 26 18 29 C16 32 16 35 17 38 C22 33 27 32 31 33 C34 28 38 25 46 24 Z" fill="#1f1226"/></g>' +
+      '<g class="wingR"><path d="M54 20 C60 10 70 5 82 6 C90 7 96 10 98 14 C92 13 88 15 86 18 C91 20 93 23 93 27 C88 25 84 26 82 29 C84 32 84 35 83 38 C78 33 73 32 69 33 C66 28 62 25 54 24 Z" fill="#1f1226"/></g>' +
+      '<ellipse cx="50" cy="24" rx="6" ry="9.5" fill="#1f1226"/>' +
+      '<circle cx="50" cy="13" r="5.2" fill="#1f1226"/>' +
+      '<path d="M46.5 10 L44 2 L50 7.5 Z" fill="#1f1226"/>' +
+      '<path d="M53.5 10 L56 2 L50 7.5 Z" fill="#1f1226"/>' +
+      '</svg></div>';
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), d * 1000 + 500);
+  }
+  setTimeout(spawnBat, 4000);
+  setInterval(() => { if (Math.random() < .6) spawnBat(); }, 12000);
+
+  let actx = null, master = null;
+  function ensureAudio() {
+    if (actx) { if (actx.state !== 'running') { try { actx.resume(); } catch (e) {} } return; }
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain();
+      master.gain.value = .14;
+      master.connect(actx.destination);
+    } catch (e) {}
+  }
+  addEventListener('pointerdown', ensureAudio);
+  addEventListener('touchend', ensureAudio);
+  let nb = null;
+  function noise() {
+    if (!nb) {
+      nb = actx.createBuffer(1, actx.sampleRate * .6 | 0, actx.sampleRate);
+      const d = nb.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return nb;
+  }
+  function whoosh() {
+    if (!actx || actx.state !== 'running') return;
+    const t = actx.currentTime;
+    const s = actx.createBufferSource(); s.buffer = noise();
+    const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 6;
+    f.frequency.setValueAtTime(500, t);
+    f.frequency.exponentialRampToValueAtTime(1600, t + .5);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(.12, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + .55);
+    s.connect(f); f.connect(g); g.connect(master);
+    s.start(t); s.stop(t + .6);
+  }
+  function boom(big) {
+    if (!actx || actx.state !== 'running') return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(big ? 70 : 95, t);
+    o.frequency.exponentialRampToValueAtTime(38, t + .5);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(big ? 1 : .7, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + .6);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + .65);
+    const s = actx.createBufferSource(); s.buffer = noise();
+    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900;
+    const g2 = actx.createGain();
+    g2.gain.setValueAtTime(.35, t);
+    g2.gain.exponentialRampToValueAtTime(.001, t + .4);
+    s.connect(f); f.connect(g2); g2.connect(master);
+    s.start(t); s.stop(t + .45);
+  }
+
+  setTimeout(() => launch(W * .3, H * .3, false), 1200);
+  setTimeout(() => launch(W * .68, H * .25, false), 2100);
+  setTimeout(() => launch(W * .5, H * .18, true), 3200);
+
+  // ---- the theme: Toccata in D minor, cathedral organ ----
+  let organGain = null, organTimer = null, organOn = true, organStarted = false;
+  function organNote(f, t, dur, vel) {
+    [[1, 1], [2, .45], [4, .2], [.5, .35]].forEach(([mult, amp]) => {
+      const o = actx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f * mult;
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vel * amp, t + .05);
+      g.gain.setValueAtTime(vel * amp, t + dur - .08);
+      g.gain.linearRampToValueAtTime(.0001, t + dur + .15);
+      o.connect(g); g.connect(organGain);
+      o.start(t); o.stop(t + dur + .25);
+    });
+  }
+  function organLoop() {
+    if (!actx) return;
+    const t0 = actx.currentTime + .25;
+    const A = 880, G = 783.99, F = 698.46, E = 659.25, D = 587.33, Cs = 554.37, Bb4 = 466.16;
+    function phrase(m, s) {
+      organNote(A * m, t0 + s, .16, .5);
+      organNote(G * m, t0 + s + .18, .16, .5);
+      organNote(A * m, t0 + s + .36, .6, .5);
+      const run = [G, F, E, D, Cs];
+      run.forEach((n, i) => organNote(n * m, t0 + s + 1.25 + i * .16, .15, .45));
+      organNote(D * m, t0 + s + 1.25 + 5 * .16, 1.5, .5);
+    }
+    phrase(1, 0);          // high octave
+    phrase(.5, 4.1);       // middle octave
+    // the great diminished chord over the deep pedal
+    organNote(73.42, t0 + 8.4, 4.4, .6);
+    [Cs / 2, E / 2, G / 2, Bb4].forEach((n, i) => organNote(n, t0 + 8.8 + i * .09, 3.6, .3));
+    // resolve to D minor
+    [146.83, F / 2, A / 2, D].forEach((n, i) => organNote(n, t0 + 13.2, 3, .35 - i * .04));
+    organTimer = setTimeout(organLoop, 18500);
+  }
+  function startOrgan() {
+    if (organStarted || !actx) return;
+    organStarted = true;
+    organGain = actx.createGain();
+    organGain.gain.value = organOn ? .4 : 0;
+    organGain.connect(master);
+    organLoop();
+  }
+  addEventListener('pointerdown', () => setTimeout(startOrgan, 100));
+  addEventListener('touchend', () => setTimeout(startOrgan, 100));
+  const songBtn = document.getElementById('songBtn');
+  ['click', 'touchend'].forEach(ev => songBtn.addEventListener(ev, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    ensureAudio();
+    setTimeout(startOrgan, 100);
+    organOn = !organOn;
+    if (organGain && actx) {
+      organGain.gain.cancelScheduledValues(actx.currentTime);
+      organGain.gain.setTargetAtTime(organOn ? .4 : 0, actx.currentTime, .06);
+    }
+    songBtn.classList.toggle('off', !organOn);
+  }));
+})();
+</script>
+
+</body>
+</html>
