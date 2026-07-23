@@ -386,8 +386,8 @@
   /* cinematic scroll reveals (3D tilt-in) — only active when the script runs */
   html.js [data-rev] {
     opacity: 0;
-    transform: perspective(900px) translateY(36px) rotateX(7deg);
-    transition: opacity .9s ease, transform .9s cubic-bezier(.16, .8, .3, 1);
+    transform: translateY(24px);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.16, .8, .3, 1);
   }
   html.js [data-rev].in { opacity: 1; transform: none; }
 
@@ -544,7 +544,7 @@
     padding: 34px 22px 28px;
     background: linear-gradient(180deg, rgba(36,20,48,.45), rgba(12,8,18,.55));
     position: relative;
-    box-shadow: 0 34px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
   }
   #letterBody::before, #letterBody::after {
     color: rgba(245,198,106,.55);
@@ -969,25 +969,31 @@
           <svg id="cakesvg" viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="sideB" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#090410"/><stop offset=".16" stop-color="#1c0e22"/><stop offset=".42" stop-color="#371b41"/><stop offset=".55" stop-color="#402150"/><stop offset=".78" stop-color="#221029"/><stop offset="1" stop-color="#090410"/>
+                <stop offset="0" stop-color="#070309"/><stop offset=".12" stop-color="#190b1f"/><stop offset=".32" stop-color="#33183f"/><stop offset=".5" stop-color="#472156"/><stop offset=".68" stop-color="#331941"/><stop offset=".88" stop-color="#130819"/><stop offset="1" stop-color="#070309"/>
               </linearGradient>
               <linearGradient id="sideT" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#0e0714"/><stop offset=".2" stop-color="#241128"/><stop offset=".45" stop-color="#44204a"/><stop offset=".58" stop-color="#4c2554"/><stop offset=".8" stop-color="#26122b"/><stop offset="1" stop-color="#0e0714"/>
+                <stop offset="0" stop-color="#0c0612"/><stop offset=".15" stop-color="#221128"/><stop offset=".38" stop-color="#43204e"/><stop offset=".55" stop-color="#552a63"/><stop offset=".75" stop-color="#2d1638"/><stop offset="1" stop-color="#0c0612"/>
               </linearGradient>
               <linearGradient id="dripG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ea2440"/><stop offset=".55" stop-color="#b40f26"/><stop offset="1" stop-color="#6d0715"/>
+                <stop offset="0" stop-color="#f22743"/><stop offset=".45" stop-color="#c11227"/><stop offset="1" stop-color="#6d0715"/>
               </linearGradient>
               <radialGradient id="plateG" cx=".5" cy=".4" r=".7">
-                <stop offset="0" stop-color="#443a5e"/><stop offset=".75" stop-color="#191226"/><stop offset="1" stop-color="#090612"/>
+                <stop offset="0" stop-color="#4a3f66"/><stop offset=".75" stop-color="#1b1329"/><stop offset="1" stop-color="#090612"/>
               </radialGradient>
-              <radialGradient id="topSurf" cx=".5" cy=".45" r=".75">
-                <stop offset="0" stop-color="#412047"/><stop offset="1" stop-color="#190c1d"/>
+              <radialGradient id="topSurf" cx=".42" cy=".38" r=".8">
+                <stop offset="0" stop-color="#54295e"/><stop offset=".55" stop-color="#33193c"/><stop offset="1" stop-color="#180b1c"/>
               </radialGradient>
               <radialGradient id="flameCore" cx=".5" cy=".4" r=".65">
                 <stop offset="0" stop-color="#fff9cf"/><stop offset=".55" stop-color="#ffdf6b"/><stop offset="1" stop-color="#ff9d3a"/>
               </radialGradient>
               <linearGradient id="standG" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#15101f"/><stop offset=".5" stop-color="#524a6e"/><stop offset="1" stop-color="#15101f"/>
+                <stop offset="0" stop-color="#15101f"/><stop offset=".5" stop-color="#5a5178"/><stop offset="1" stop-color="#15101f"/>
+              </linearGradient>
+              <radialGradient id="beadG" cx=".35" cy=".3" r=".8">
+                <stop offset="0" stop-color="#ffe9a8"/><stop offset=".5" stop-color="#d4a94e"/><stop offset="1" stop-color="#77591d"/>
+              </radialGradient>
+              <linearGradient id="sheenG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,255,255,.16)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
               </linearGradient>
               <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2"/></filter>
               <filter id="fglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3"/></filter>
@@ -995,39 +1001,61 @@
             <ellipse cx="150" cy="248" rx="118" ry="12" fill="#000" opacity=".55" filter="url(#soft)"/>
             <ellipse cx="150" cy="242" rx="44" ry="7.5" fill="url(#standG)"/>
             <path d="M141 242 v-14 q0 -7 -10 -10 h38 q-10 3 -10 10 v14 z" fill="url(#standG)"/>
+            <rect x="139" y="230" width="22" height="2.6" rx="1.3" fill="url(#beadG)" opacity=".85"/>
             <ellipse cx="150" cy="218" rx="112" ry="18" fill="url(#plateG)"/>
+            <path d="M38 218 a112 18 0 0 1 224 0" fill="none" stroke="url(#beadG)" stroke-width="1.6" opacity=".7"/>
             <ellipse cx="150" cy="215" rx="101" ry="14.5" fill="#0c0816"/>
-            <path d="M52 216 a98 14 0 0 1 196 0" fill="none" stroke="#6a5d92" stroke-width="1.3" opacity=".55"/>
+            <path d="M64 210 a92 12 0 0 1 70 -9" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="150" cy="203" rx="96" ry="10" fill="#000" opacity=".4" filter="url(#soft)"/>
             <path d="M56 152 v46 a94 15 0 0 0 188 0 v-46" fill="url(#sideB)"/>
-            <ellipse cx="150" cy="152" rx="94" ry="15" fill="#1d0e21"/>
+            <ellipse cx="150" cy="152" rx="94" ry="15" fill="#1f0f24"/>
             <ellipse cx="150" cy="152" rx="72" ry="11" fill="#000" opacity=".38" filter="url(#soft)"/>
             <path d="M56 152 a94 15 0 0 0 188 0 l0 3 q-3 13 -7 2 q-5 20 -11 3 q-4 11 -9 3 q-5 24 -11 2 q-4 12 -9 3 q-5 18 -11 2 q-4 13 -9 2 q-5 26 -11 1 q-4 12 -9 2 q-5 18 -11 1 q-4 11 -9 1 q-5 22 -11 1 q-4 11 -9 0 q-5 17 -11 0 q-4 9 -9 -1 q-5 15 -11 -2 q-4 8 -9 -3 q-3 9 -7 -3 z" fill="url(#dripG)"/>
+            <path d="M84 160 q1 10 3 14 M122 162 q1 12 3 17 M167 162 q1 11 3 16 M207 158 q1 8 2 12" stroke="#ff5f74" stroke-width="1.4" fill="none" opacity=".65" stroke-linecap="round"/>
             <circle cx="86" cy="177" r="3" fill="#8f0b1d"/><circle cx="124" cy="183" r="3.4" fill="#8f0b1d"/><circle cx="169" cy="182" r="3.2" fill="#8f0b1d"/><circle cx="209" cy="174" r="2.8" fill="#8f0b1d"/>
+            <circle cx="85" cy="176" r="1" fill="#ff8b9c" opacity=".8"/><circle cx="123" cy="182" r="1.1" fill="#ff8b9c" opacity=".8"/><circle cx="168" cy="181" r="1" fill="#ff8b9c" opacity=".8"/>
             <g fill="#ece6f2">
               <circle cx="103" cy="184" r="6.5"/><rect x="99.2" y="187.4" width="7.6" height="5" rx="1.6"/>
               <circle cx="150" cy="189" r="7"/><rect x="146" y="192.6" width="8" height="5.4" rx="1.7"/>
               <circle cx="197" cy="184" r="6.5"/><rect x="193.2" y="187.4" width="7.6" height="5" rx="1.6"/>
             </g>
+            <path d="M97 186 a6.5 6.5 0 0 0 12 1 z M144 191 a7 7 0 0 0 13 1 z M191 186 a6.5 6.5 0 0 0 12 1 z" fill="#b9aec9" opacity=".55"/>
             <g fill="#160d1a">
               <circle cx="100.8" cy="183" r="1.8"/><circle cx="105.4" cy="183" r="1.8"/><path d="M103 186 l1.4 2.4 h-2.8 z"/>
               <circle cx="147.6" cy="188" r="1.9"/><circle cx="152.6" cy="188" r="1.9"/><path d="M150 191 l1.5 2.5 h-3 z"/>
               <circle cx="194.8" cy="183" r="1.8"/><circle cx="199.4" cy="183" r="1.8"/><path d="M197 186 l1.4 2.4 h-2.8 z"/>
             </g>
-            <path d="M68 160 q-3 20 3 32" stroke="rgba(255,255,255,.12)" stroke-width="7" fill="none" stroke-linecap="round" filter="url(#soft)"/>
+            <circle cx="57.7" cy="200.8" r="3.1" fill="url(#beadG)"/><circle cx="62.9" cy="203.6" r="3.1" fill="url(#beadG)"/><circle cx="71.6" cy="206.3" r="3.1" fill="url(#beadG)"/><circle cx="83.2" cy="208.6" r="3.1" fill="url(#beadG)"/><circle cx="97.5" cy="210.4" r="3.1" fill="url(#beadG)"/><circle cx="113.8" cy="211.8" r="3.1" fill="url(#beadG)"/><circle cx="131.6" cy="212.7" r="3.1" fill="url(#beadG)"/><circle cx="150.0" cy="213.0" r="3.1" fill="url(#beadG)"/><circle cx="168.4" cy="212.7" r="3.1" fill="url(#beadG)"/><circle cx="186.2" cy="211.8" r="3.1" fill="url(#beadG)"/><circle cx="202.5" cy="210.4" r="3.1" fill="url(#beadG)"/><circle cx="216.8" cy="208.6" r="3.1" fill="url(#beadG)"/><circle cx="228.4" cy="206.3" r="3.1" fill="url(#beadG)"/><circle cx="237.1" cy="203.6" r="3.1" fill="url(#beadG)"/><circle cx="242.3" cy="200.8" r="3.1" fill="url(#beadG)"/>
+            <path d="M70 156 q-4 22 2 38" stroke="url(#sheenG)" stroke-width="13" fill="none" stroke-linecap="round"/>
             <path d="M88 106 v40 a62 10.5 0 0 0 124 0 v-40" fill="url(#sideT)"/>
             <ellipse cx="150" cy="106" rx="62" ry="10.5" fill="url(#topSurf)"/>
-            <ellipse cx="150" cy="106" rx="54" ry="8.4" fill="#22101f" opacity=".55"/>
-            <path d="M100 103 a52 7.5 0 0 1 100 0" stroke="rgba(255,255,255,.1)" stroke-width="2" fill="none"/>
+            <path d="M102 103 a50 7 0 0 1 62 -4" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2.2" stroke-linecap="round"/>
             <path d="M88 106 a62 10.5 0 0 0 124 0 l0 3 q-3 11 -7 1 q-4 16 -9 2 q-4 10 -8 2 q-4 18 -9 1 q-4 10 -8 2 q-4 14 -9 1 q-4 11 -8 2 q-4 17 -9 1 q-4 10 -8 1 q-4 13 -9 1 q-4 9 -8 0 q-4 13 -9 -1 q-4 8 -8 -2 q-3 10 -7 -2 z" fill="url(#dripG)"/>
+            <path d="M112 112 q1 8 2 12 M148 114 q1 10 2 14 M182 112 q1 8 2 11" stroke="#ff5f74" stroke-width="1.2" fill="none" opacity=".65" stroke-linecap="round"/>
             <circle cx="116" cy="128" r="2.6" fill="#8f0b1d"/><circle cx="150" cy="131" r="3" fill="#8f0b1d"/><circle cx="185" cy="127" r="2.6" fill="#8f0b1d"/>
+            <circle cx="115" cy="127" r=".9" fill="#ff8b9c" opacity=".8"/><circle cx="149" cy="130" r="1" fill="#ff8b9c" opacity=".8"/>
             <path d="M150 134 q-2.5 -5 -7 -5 q-5 0 -5 4 q-7 -2 -9 2.6 q5 .8 9 .8 q3.5 2.6 7 2.6 q5 0 5 -5 q0 5 5 5 q3.5 0 7 -2.6 q4 0 9 -.8 q-2 -4.6 -9 -2.6 q0 -4 -5 -4 q-4.5 0 -7 5 z" fill="#c9a0dc"/>
-            <path d="M96 112 q-2 14 3 24" stroke="rgba(255,255,255,.13)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#soft)"/>
+            <circle cx="89.1" cy="148.0" r="2.6" fill="url(#beadG)"/><circle cx="94.6" cy="150.7" r="2.6" fill="url(#beadG)"/><circle cx="104.3" cy="153.1" r="2.6" fill="url(#beadG)"/><circle cx="117.4" cy="154.9" r="2.6" fill="url(#beadG)"/><circle cx="133.1" cy="156.1" r="2.6" fill="url(#beadG)"/><circle cx="150.0" cy="156.5" r="2.6" fill="url(#beadG)"/><circle cx="166.9" cy="156.1" r="2.6" fill="url(#beadG)"/><circle cx="182.6" cy="154.9" r="2.6" fill="url(#beadG)"/><circle cx="195.7" cy="153.1" r="2.6" fill="url(#beadG)"/><circle cx="205.4" cy="150.7" r="2.6" fill="url(#beadG)"/><circle cx="210.9" cy="148.0" r="2.6" fill="url(#beadG)"/>
+            <path d="M97 111 q-3 16 2 28" stroke="url(#sheenG)" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <g transform="translate(66,206)">
+              <path d="M-10 2 q-7 -2 -9 -8 q7 -1 10 4 z" fill="#22301f"/>
+              <circle r="8.5" fill="#150f1c"/><circle r="5.8" cx="1" cy="-.8" fill="#221731"/><circle r="3.4" cx="-.8" cy=".6" fill="#2e1d40"/><circle r="1.4" cx=".4" cy="-.3" fill="#4a2f66"/>
+              <path d="M-8.5 0 a8.5 8.5 0 0 1 6 -8" fill="none" stroke="#5b3a7d" stroke-width=".9" opacity=".8"/>
+            </g>
+            <g transform="translate(210,149) scale(.8)">
+              <path d="M10 2 q7 -2 9 -8 q-7 -1 -10 4 z" fill="#22301f"/>
+              <circle r="8.5" fill="#150f1c"/><circle r="5.8" cx="-1" cy="-.8" fill="#221731"/><circle r="3.4" cx=".8" cy=".6" fill="#2e1d40"/><circle r="1.4" cx="-.4" cy="-.3" fill="#4a2f66"/>
+              <path d="M8.5 0 a8.5 8.5 0 0 0 -6 -8" fill="none" stroke="#5b3a7d" stroke-width=".9" opacity=".8"/>
+            </g>
+            <circle cx="120" cy="168" r="1" fill="rgba(255,255,255,.3)"/><circle cx="176" cy="172" r=".9" fill="rgba(255,255,255,.25)"/><circle cx="132" cy="122" r=".9" fill="rgba(255,255,255,.3)"/><circle cx="170" cy="118" r=".8" fill="rgba(255,255,255,.25)"/>
             <g id="candles"></g>
             <path id="cakeGap" d="M136 153 L150 199 L166 153 Q151 159 136 153 z" fill="#0c050a"/>
             <g id="cakeSlice">
               <ellipse cx="243" cy="240" rx="34" ry="7" fill="url(#plateG)"/>
+              <path d="M212 239 a34 6.4 0 0 1 62 0" fill="none" stroke="url(#beadG)" stroke-width="1.2" opacity=".7"/>
               <path d="M228 236 L228 210 Q243 202 258 210 L258 236 z" fill="#7a0e1e"/>
               <path d="M228 218 L258 218 M228 227 L258 227" stroke="#4a0812" stroke-width="2.4"/>
+              <path d="M229 212 q0 12 0 22" stroke="#a8354a" stroke-width="1.4" opacity=".7"/>
               <path d="M228 210 Q243 201 258 210 L258 214 Q243 206 228 214 z" fill="#c1121f"/>
               <circle cx="243" cy="205" r="3.4" fill="#ece6f2"/>
               <circle cx="241.7" cy="204.4" r=".9" fill="#160d1a"/>
@@ -1065,8 +1093,9 @@
   const rand = (a, b) => a + Math.random() * (b - a);
 
   const risers = [], textParticles = [], trail = [];
+  let trailSkip = 0;
   function addTrail(x, y) {
-    if (trail.length > 130) return;
+    if (++trailSkip % 2 || trail.length > 80) return;
     trail.push({
       x: x + rand(-4, 4), y: y + rand(-4, 4),
       vx: rand(-.3, .3), vy: rand(.1, .8),
@@ -1090,9 +1119,9 @@
     t.textBaseline = 'middle';
     t.fillText(str, 150, 84);
     const data = t.getImageData(0, 0, 300, 160).data;
-    const step = mobile ? 6 : 5;
-    const bw = Math.min(W * .85, 520), bh = bw * 160 / 300;
-    const ox = (W - bw) / 2, oy = H * .16;
+    const step = mobile ? 5 : 4;
+    const bw = Math.min(W * .95, 640), bh = bw * 160 / 300;
+    const ox = (W - bw) / 2, oy = H * .14;
     for (let y = 0; y < 160; y += step) {
       for (let x = 0; x < 300; x += step) {
         if (data[(y * 300 + x) * 4 + 3] > 128) {
@@ -1101,8 +1130,8 @@
             tx: ox + x / 300 * bw, ty: oy + y / 160 * bh,
             phase: 0, age: 0, delay: rand(0, 35) | 0,
             vx: 0, vy: 0,
-            color: Math.random() < .5 ? '#f5c66a' : '#fff3b0',
-            size: rand(1.6, 2.7)
+            color: Math.random() < .6 ? '#fff3b0' : '#ffe9a8',
+            size: rand(2.1, 3.3)
           });
         }
       }
@@ -1248,33 +1277,6 @@
       ctx.moveTo(s.x, s.y - s.size * 2.4); ctx.lineTo(s.x, s.y + s.size * 2.4);
       ctx.stroke();
     }
-    for (let i = textParticles.length - 1; i >= 0; i--) {
-      const p = textParticles[i];
-      if (p.delay > 0) { p.delay--; continue; }
-      p.age++;
-      if (p.phase === 0) {
-        p.x += (p.tx - p.x) * .085;
-        p.y += (p.ty - p.y) * .085;
-        if (p.age > 85) { p.phase = 1; p.age = 0; }
-        ctx.globalAlpha = Math.min(1, p.age / 25);
-      } else if (p.phase === 1) {
-        p.x = p.tx; p.y = p.ty;
-        ctx.globalAlpha = .75 + .25 * Math.sin(p.age * .18 + p.tx);
-        if (p.age > 110) {
-          p.phase = 2; p.age = 0;
-          p.vx = rand(-2.4, 2.4); p.vy = rand(-1.6, .6);
-        }
-      } else {
-        p.x += p.vx; p.y += p.vy;
-        p.vy += .05; p.vx *= .99;
-        ctx.globalAlpha = Math.max(0, 1 - p.age / 55);
-        if (p.age > 55) { textParticles.splice(i, 1); continue; }
-      }
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-    }
     ctx.globalAlpha = 1;
 
     ctx.globalCompositeOperation = 'source-over';
@@ -1290,6 +1292,44 @@
       ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
       ctx.restore();
     }
+
+    // the "21" burns on top of everything, with a glow
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = textParticles.length - 1; i >= 0; i--) {
+      const p = textParticles[i];
+      if (p.delay > 0) { p.delay--; continue; }
+      p.age++;
+      let a;
+      if (p.phase === 0) {
+        p.x += (p.tx - p.x) * .085;
+        p.y += (p.ty - p.y) * .085;
+        if (p.age > 85) { p.phase = 1; p.age = 0; }
+        a = Math.min(1, p.age / 25);
+      } else if (p.phase === 1) {
+        p.x = p.tx; p.y = p.ty;
+        a = .82 + .18 * Math.sin(p.age * .18 + p.tx);
+        if (p.age > 150) {
+          p.phase = 2; p.age = 0;
+          p.vx = rand(-2.4, 2.4); p.vy = rand(-1.6, .6);
+        }
+      } else {
+        p.x += p.vx; p.y += p.vy;
+        p.vy += .05; p.vx *= .99;
+        a = Math.max(0, 1 - p.age / 55);
+        if (p.age > 55) { textParticles.splice(i, 1); continue; }
+      }
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a * .3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = a;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
 
     requestAnimationFrame(frame);
   }
@@ -1418,6 +1458,16 @@
     if (!musicStarted) {
       musicStarted = true;
       try {
+        // silent looping <audio>: switches iPhone into media-playback mode so the
+        // piano plays even when the ringer mute switch is on
+        const silent = document.createElement('audio');
+        silent.setAttribute('playsinline', '');
+        silent.loop = true;
+        silent.volume = 0.01;
+        silent.src = 'data:audio/wav;base64,UklGRtQEAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YbAEAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA=';
+        const sp = silent.play();
+        if (sp && sp.catch) sp.catch(() => {});
+        window._silentKeeper = silent;
         actx = new (window.AudioContext || window.webkitAudioContext)();
         // iOS unlock: play one silent sample inside the user gesture
         const ub = actx.createBuffer(1, 1, 22050);
@@ -1445,6 +1495,9 @@
         actx.onstatechange = () => {
           if (actx.state === 'running') musicUiOn();
         };
+        // if sound still isn't flowing, point her at the button directly
+        const hint = document.getElementById('musicHint');
+        if (hint) hint.innerHTML = 'press the ♪ button<br>for the piano';
       }
     }
   }
@@ -1700,14 +1753,10 @@
           const how = matchMedia('(pointer: coarse)').matches
             ? 'Swipe your finger across the cake to cut it.'
             : 'Click on the cake, hold, and drag across it to cut it.';
-          countEl.textContent = how;
-          const cap = document.querySelector('.wishsec .caption');
-          if (cap) {
-            cap.innerHTML = 'One more thing. The cake needs cutting.<br>' + how + ' The first slice is yours.';
-            cap.classList.add('attn');
-          }
+          countEl.innerHTML = 'One more thing, the cake needs cutting.<br>' + how + '<br>The first slice is yours.';
+          countEl.classList.add('attn');
         }
-      }, 8600);
+      }, 5200);
     }
   });
 
@@ -1718,6 +1767,7 @@
     if (Math.abs(dx) > 55 && Math.abs(dy) < 90) {
       cakeCut = true;
       document.getElementById('cakesvg').classList.add('sliced');
+      countEl.classList.remove('attn');
       countEl.textContent = 'there. the first slice is yours.';
       const r = cakeDoll.getBoundingClientRect();
       explode(r.left + r.width * .82, r.top + r.height * .85, '#f2a9c4');
