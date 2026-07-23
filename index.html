@@ -109,6 +109,27 @@
     z-index: 0;
     pointer-events: none;
   }
+  #fx2 {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+  }
+  #mhsubs {
+    min-height: 2.4em;
+    margin-top: 12px;
+    font-size: clamp(1.05rem, 3.6vw, 1.35rem);
+    font-style: italic;
+    color: #efeaf8;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  #mhsubs.show { opacity: 1; }
+  #mhsubs .who {
+    font-style: normal;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+  }
 
   /* cinematic vignette */
   body::after {
@@ -526,6 +547,17 @@
     display: block;
     pointer-events: none;
   }
+  .polaroid .pcap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.5%;
+    text-align: center;
+    font-family: 'Great Vibes', cursive;
+    color: #4a4258;
+    font-size: 1.05rem;
+    pointer-events: none;
+  }
 
   .divider {
     position: relative;
@@ -879,6 +911,7 @@
 <div id="musicHint">touch anywhere<br>for the piano ♪</div>
 <div class="stars"></div>
 <canvas id="fireworks"></canvas>
+<canvas id="fx2"></canvas>
 
 <main>
   <section class="hero">
@@ -929,15 +962,17 @@
         <div class="pimg"><img loading="lazy" decoding="async" src="photos/p08.jpg" alt=""><img loading="lazy" decoding="async" src="photos/p09.jpg" alt=""></div>
       </div>
       <div class="pair">
-        <div class="ptxt"><p>You don't have to reply to this. I just needed to get this out one time, properly, and leave it here with the fireworks. That's it.</p></div>
+        <div class="ptxt"><p>And by the way, you were right about my hand. When you told me to go to the hospital, I didn't listen, and it turned out to be a fracture. I didn't treat it well and I ended up having surgery for it. So thank you for telling me, and my bad for not listening. You were right. Laugh all you want, I don't give a shit, at least I gained a cool scar. And I'm not lying. If you want to see the proof, it's hiding somewhere under the photos at the end. You'll have to dig.</p></div>
         <div class="pimg"><img loading="lazy" decoding="async" src="photos/p11.jpg" alt=""><img loading="lazy" decoding="async" src="photos/p12.jpg" alt=""></div>
       </div>
+      <p>You don't have to reply to this. I just needed to get this out one time, properly, and leave it here with the fireworks. That's it.</p>
       <div class="pair">
         <div class="ptxt"><p>I hope 21 is good to you. I hope you're happy, for real. Always. Thank you for everything.</p></div>
         <div class="pimg"><img loading="lazy" decoding="async" src="photos/p13.jpg" alt=""><img loading="lazy" decoding="async" src="photos/p02.jpg" alt=""></div>
       </div>
       <p>These are some of the photos we share. I have a lot more, but I couldn't upload them all because the website can't handle all of it. Go through them, move them around.</p>
       <div id="ptable">
+        <div class="polaroid" style="left:28%;top:31%;transform:rotate(2deg)"><img loading="lazy" decoding="async" src="photos/hand.jpg" alt=""><span class="pcap">you were right</span></div>
         <div class="polaroid" style="left:2%;top:1%;transform:rotate(-7deg)"><img loading="lazy" decoding="async" src="photos/p15.jpg" alt=""></div>
         <div class="polaroid" style="left:52%;top:0%;transform:rotate(5deg)"><img loading="lazy" decoding="async" src="photos/q01.jpg" alt=""></div>
         <div class="polaroid" style="left:27%;top:9%;transform:rotate(-2deg)"><img loading="lazy" decoding="async" src="photos/p16.jpg" alt=""></div>
@@ -1080,7 +1115,8 @@
           </svg>
         </div>
       </div>
-      <p id="candleCount" class="caption" style="margin-top:24px">21 candles. Start pressing.</p>
+      <div id="mhsubs"></div>
+      <p id="candleCount" class="caption" style="margin-top:14px">21 candles. Start pressing.</p>
       <p id="wishMsg"></p>
     </div>
   </section>
@@ -1100,6 +1136,8 @@
 (() => {
   const canvas = document.getElementById('fireworks');
   const ctx = canvas.getContext('2d');
+  const canvas2 = document.getElementById('fx2');
+  const ctx2 = canvas2.getContext('2d');
   let W, H, DPR = 1;
   const resize = () => {
     W = innerWidth; H = innerHeight;
@@ -1109,6 +1147,11 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    canvas2.width = W * DPR;
+    canvas2.height = H * DPR;
+    canvas2.style.width = W + 'px';
+    canvas2.style.height = H + 'px';
+    ctx2.setTransform(DPR, 0, 0, DPR, 0, 0);
   };
   addEventListener('resize', resize); resize();
 
@@ -1145,7 +1188,7 @@
     const data = t.getImageData(0, 0, 300, 160).data;
     const step = mobile ? 5 : 4;
     const bw = Math.min(W * .95, 640), bh = bw * 160 / 300;
-    const ox = (W - bw) / 2, oy = H * .14;
+    const ox = (W - bw) / 2, oy = H * .3;
     for (let y = 0; y < 160; y += step) {
       for (let x = 0; x < 300; x += step) {
         if (data[(y * 300 + x) * 4 + 3] > 128) {
@@ -1336,43 +1379,46 @@
       ctx.restore();
     }
 
-    // the "21" burns on top of everything, with a glow
-    ctx.globalCompositeOperation = 'lighter';
-    for (let i = textParticles.length - 1; i >= 0; i--) {
-      const p = textParticles[i];
-      if (p.delay > 0) { p.delay--; continue; }
-      p.age++;
-      let a;
-      if (p.phase === 0) {
-        p.x += (p.tx - p.x) * .085;
-        p.y += (p.ty - p.y) * .085;
-        if (p.age > 85) { p.phase = 1; p.age = 0; }
-        a = Math.min(1, p.age / 25);
-      } else if (p.phase === 1) {
-        p.x = p.tx; p.y = p.ty;
-        a = .82 + .18 * Math.sin(p.age * .18 + p.tx);
-        if (p.age > 150) {
-          p.phase = 2; p.age = 0;
-          p.vx = rand(-2.4, 2.4); p.vy = rand(-1.6, .6);
+    // the "21" pops on its own layer, in front of everything
+    ctx2.clearRect(0, 0, W, H);
+    if (textParticles.length) {
+      ctx2.globalCompositeOperation = 'lighter';
+      for (let i = textParticles.length - 1; i >= 0; i--) {
+        const p = textParticles[i];
+        if (p.delay > 0) { p.delay--; continue; }
+        p.age++;
+        let a;
+        if (p.phase === 0) {
+          p.x += (p.tx - p.x) * .085;
+          p.y += (p.ty - p.y) * .085;
+          if (p.age > 85) { p.phase = 1; p.age = 0; }
+          a = Math.min(1, p.age / 25);
+        } else if (p.phase === 1) {
+          p.x = p.tx; p.y = p.ty;
+          a = .82 + .18 * Math.sin(p.age * .18 + p.tx);
+          if (p.age > 150) {
+            p.phase = 2; p.age = 0;
+            p.vx = rand(-2.4, 2.4); p.vy = rand(-1.6, .6);
+          }
+        } else {
+          p.x += p.vx; p.y += p.vy;
+          p.vy += .05; p.vx *= .99;
+          a = Math.max(0, 1 - p.age / 55);
+          if (p.age > 55) { textParticles.splice(i, 1); continue; }
         }
-      } else {
-        p.x += p.vx; p.y += p.vy;
-        p.vy += .05; p.vx *= .99;
-        a = Math.max(0, 1 - p.age / 55);
-        if (p.age > 55) { textParticles.splice(i, 1); continue; }
+        ctx2.fillStyle = p.color;
+        ctx2.globalAlpha = a * .3;
+        ctx2.beginPath();
+        ctx2.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
+        ctx2.fill();
+        ctx2.globalAlpha = a;
+        ctx2.beginPath();
+        ctx2.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx2.fill();
       }
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = a * .3;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = a;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      ctx2.globalAlpha = 1;
+      ctx2.globalCompositeOperation = 'source-over';
     }
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
 
     requestAnimationFrame(frame);
   }
@@ -1856,6 +1902,22 @@
       wishMsg.textContent = 'Happy 21st birthday, Mihrişah.';
       wishMsg.classList.add('show');
       setTimeout(() => spellText('21'), 900);
+      // the girls say happy birthday, left to right, movie-subtitle style
+      const SUBS = [
+        ['Lagoona', '#7fd8be', 'Happy birthday, Mihrişah!'],
+        ['Draculaura', '#ff7bac', 'Happy birthday!!'],
+        ['Frankie', '#9fe8c4', 'Happy birthday!'],
+        ['Clawdeen', '#c084fc', 'Happy birthday, superstar.'],
+        ['Cleo', '#f5c66a', 'Happy birthday, darling.']
+      ];
+      const subEl = document.getElementById('mhsubs');
+      SUBS.forEach((s, i) => {
+        setTimeout(() => {
+          subEl.innerHTML = '<span class="who" style="color:' + s[1] + '">' + s[0] + ':</span> “' + s[2] + '”';
+          subEl.classList.add('show');
+        }, 1600 + i * 2100);
+      });
+      setTimeout(() => subEl.classList.remove('show'), 1600 + SUBS.length * 2100 + 600);
       confettiBurst(160);
       setTimeout(() => confettiBurst(120), 1200);
       setTimeout(() => confettiBurst(120), 2600);
@@ -1884,12 +1946,12 @@
       setTimeout(() => {
         if (!cakeCut) {
           const how = matchMedia('(pointer: coarse)').matches
-            ? 'Swipe your finger across the cake to cut it.'
-            : 'Click on the cake, hold, and drag across it to cut it.';
-          countEl.innerHTML = 'One more thing, the cake needs cutting.<br>' + how + '<br>The first slice is yours.';
+            ? 'Swipe your finger across it.'
+            : 'Click on it, hold, and drag across it.';
+          countEl.innerHTML = 'By the way, you need to slice the cake if you want a piece of it. ' + how + "<br>Right to left, left to right, doesn't matter. Just slice it.";
           countEl.classList.add('attn');
         }
-      }, 5200);
+      }, 13000);
     }
   });
 
