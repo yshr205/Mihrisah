@@ -537,7 +537,7 @@
     padding: 3.5% 3.5% 12%;
     border-radius: 3px;
     box-shadow: 0 10px 26px rgba(0,0,0,.5);
-    touch-action: none;
+    touch-action: pan-y;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -1614,8 +1614,8 @@
   }
   addEventListener('pointerdown', startMusic);
   addEventListener('click', startMusic);
-  addEventListener('touchend', startMusic);
-  addEventListener('touchstart', startMusic);
+  addEventListener('touchend', startMusic, { passive: true });
+  addEventListener('touchstart', startMusic, { passive: true });
   const musicBtn = document.getElementById('musicBtn');
   onTap(musicBtn, e => {
     e.stopPropagation();
