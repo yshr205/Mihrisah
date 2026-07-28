@@ -748,24 +748,31 @@
   }
 
   const ashes = [];
-  let tick = 0;
-  function frame() {
+  let tick = 0, ashAcc = 0, lastT = 0;
+  function frame(now) {
+    let dt = lastT ? (now - lastT) / 16.667 : 1;
+    lastT = now || 0;
+    if (!(dt > 0)) dt = 1;
+    if (dt > 3) dt = 3;
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'rgba(5,3,8,0.18)';
+    ctx.fillStyle = 'rgba(5,3,8,' + Math.min(.5, .18 * dt).toFixed(3) + ')';
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'lighter';
 
-    if (++tick % 210 === 0) launch(rand(W * .12, W * .88), rand(H * .1, H * .48), false);
+    tick += dt;
+    if (tick >= 210) { tick = 0; launch(rand(W * .12, W * .88), rand(H * .1, H * .48), false); }
 
     // ash drifting down
-    if (tick % 34 === 0 && ashes.length < 26) {
+    ashAcc += dt;
+    if (ashAcc >= 34 && ashes.length < 26) {
+      ashAcc = 0;
       ashes.push({ x: rand(0, W), y: -6, vy: rand(.3, .8), ph: rand(0, 6.28), s: rand(.7, 1.6) });
     }
     ctx.globalCompositeOperation = 'source-over';
     for (let i = ashes.length - 1; i >= 0; i--) {
       const a = ashes[i];
-      a.y += a.vy;
-      a.x += Math.sin(a.ph + a.y * .012) * .4;
+      a.y += a.vy * dt;
+      a.x += Math.sin(a.ph + a.y * .012) * .4 * dt;
       if (a.y > H + 8) { ashes.splice(i, 1); continue; }
       ctx.globalAlpha = .3;
       ctx.beginPath();
@@ -787,10 +794,10 @@
     }
     for (let i = embers.length - 1; i >= 0; i--) {
       const em = embers[i];
-      em.age++;
+      em.age += dt;
       if (em.age >= em.life) { embers.splice(i, 1); continue; }
-      em.x += em.vx + Math.sin(em.age * .03) * .3;
-      em.y += em.vy;
+      em.x += (em.vx + Math.sin(em.age * .03) * .3) * dt;
+      em.y += em.vy * dt;
       ctx.globalAlpha = Math.sin(Math.PI * em.age / em.life) * .5;
       ctx.beginPath();
       ctx.arc(em.x, em.y, em.s, 0, Math.PI * 2);
@@ -801,7 +808,7 @@
 
     for (let i = rockets.length - 1; i >= 0; i--) {
       const r = rockets[i];
-      r.age++;
+      r.age += dt;
       const t = r.age / r.dur;
       const x = r.sx + (r.tx - r.sx) * t;
       const y = r.sy + (r.ty - r.sy) * (t * t * (3 - 2 * t)) - Math.sin(Math.PI * t) * 30;
@@ -824,10 +831,10 @@
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      p.x += p.vx; p.y += p.vy;
-      const dr = p.dr || .985;
-      p.vx *= dr; p.vy = p.vy * dr + .06;
-      p.age++;
+      const dr = Math.pow(p.dr || .985, dt);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= dr; p.vy = p.vy * dr + .06 * dt;
+      p.age += dt;
       const a = 1 - p.age / p.life;
       if (a <= 0) {
         if (p.ck) {
@@ -854,7 +861,7 @@
     ctx.globalCompositeOperation = 'source-over';
     requestAnimationFrame(frame);
   }
-  frame();
+  requestAnimationFrame(frame);
 
   // reactive: tap = shell, hold = big shell, drag = shells along the whole sweep
   let userShots = 0, s21done = false;
@@ -1152,9 +1159,9 @@
       setTimeout(startOrgan, 120);
     } else {
       organOn = !organOn;
-      if (organGain && actx) {
-        organGain.gain.cancelScheduledValues(actx.currentTime);
-        organGain.gain.setTargetAtTime(organOn ? .55 : 0, actx.currentTime, .06);
+      if (master && actx) {
+        master.gain.cancelScheduledValues(actx.currentTime);
+        master.gain.setTargetAtTime(organOn ? .18 : 0, actx.currentTime, .06);
       }
     }
     songBtn.classList.toggle('off', !organOn);

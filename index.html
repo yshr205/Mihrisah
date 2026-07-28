@@ -1440,20 +1440,27 @@
     sfx('boom');
   }
 
-  let tick = 0;
-  function frame() {
+  let tick = 0, lastT = 0;
+  function frame(now) {
+    // real-clock physics: same speed at 60fps, 30fps, any fps
+    let dt = lastT ? (now - lastT) / 16.667 : 1;
+    lastT = now || 0;
+    if (!(dt > 0)) dt = 1;
+    if (dt > 3) dt = 3;
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'rgba(10,10,20,0.18)';
+    ctx.fillStyle = 'rgba(10,10,20,' + Math.min(.5, .18 * dt).toFixed(3) + ')';
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'lighter';
 
-    if (tick++ % (mobile ? 64 : 40) === 0 || (Math.random() < (mobile ? .012 : .02))) launch();
+    tick += dt;
+    if (tick >= (mobile ? 64 : 40)) { tick = 0; launch(); }
+    else if (Math.random() < (mobile ? .012 : .02) * dt) launch();
 
     for (let i = rockets.length - 1; i >= 0; i--) {
       const r = rockets[i];
       r.trail.push({ x: r.x, y: r.y });
       if (r.trail.length > 8) r.trail.shift();
-      r.x += r.vx; r.y += r.vy; r.vy += 0.12;
+      r.x += r.vx * dt; r.y += r.vy * dt; r.vy += 0.12 * dt;
       ctx.beginPath();
       ctx.arc(r.x, r.y, 2, 0, Math.PI * 2);
       ctx.fillStyle = r.color;
@@ -1471,9 +1478,10 @@
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      p.x += p.vx; p.y += p.vy;
-      p.vx *= .985; p.vy = p.vy * .985 + .06;
-      p.age++;
+      const dk = Math.pow(.985, dt);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= dk; p.vy = p.vy * dk + .06 * dt;
+      p.age += dt;
       const a = 1 - p.age / p.life;
       if (a <= 0) {
         if (p.ck) {
@@ -1498,9 +1506,9 @@
     }
     for (let i = trail.length - 1; i >= 0; i--) {
       const s = trail[i];
-      s.age++;
+      s.age += dt;
       if (s.age >= s.life) { trail.splice(i, 1); continue; }
-      s.x += s.vx; s.y += s.vy;
+      s.x += s.vx * dt; s.y += s.vy * dt;
       ctx.globalAlpha = 1 - s.age / s.life;
       ctx.fillStyle = s.color;
       ctx.beginPath();
@@ -1511,10 +1519,10 @@
 
     for (let i = risers.length - 1; i >= 0; i--) {
       const s = risers[i];
-      s.age++;
+      s.age += dt;
       if (s.age < 0) continue;
       if (s.age >= s.life) { risers.splice(i, 1); continue; }
-      s.x += s.vx; s.y += s.vy;
+      s.x += s.vx * dt; s.y += s.vy * dt;
       const a = Math.sin(Math.PI * s.age / s.life);
       ctx.globalAlpha = a;
       ctx.fillStyle = s.color;
@@ -1533,10 +1541,10 @@
     ctx.globalCompositeOperation = 'source-over';
     for (let i = smokes.length - 1; i >= 0; i--) {
       const s = smokes[i];
-      s.age++;
+      s.age += dt;
       if (s.age >= s.life) { smokes.splice(i, 1); continue; }
-      s.x += s.vx + Math.sin(s.ph + s.age * .08) * .3;
-      s.y += s.vy;
+      s.x += (s.vx + Math.sin(s.ph + s.age * .08) * .3) * dt;
+      s.y += s.vy * dt;
       ctx.globalAlpha = Math.sin(Math.PI * s.age / s.life) * .22;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.s + s.age * .05, 0, Math.PI * 2);
@@ -1546,8 +1554,8 @@
     ctx.globalAlpha = 1;
     for (let i = confetti.length - 1; i >= 0; i--) {
       const c = confetti[i];
-      c.x += c.vx; c.y += c.vy; c.rot += c.vr;
-      if (c.g) c.vy += .12; else c.vx += Math.sin(c.y * .02) * .02;
+      c.x += c.vx * dt; c.y += c.vy * dt; c.rot += c.vr * dt;
+      if (c.g) c.vy += .12 * dt; else c.vx += Math.sin(c.y * .02) * .02 * dt;
       if (c.y > H + 20) { confetti.splice(i, 1); continue; }
       ctx.save();
       ctx.translate(c.x, c.y);
@@ -1563,12 +1571,13 @@
       ctx2.globalCompositeOperation = 'lighter';
       for (let i = textParticles.length - 1; i >= 0; i--) {
         const p = textParticles[i];
-        if (p.delay > 0) { p.delay--; continue; }
-        p.age++;
+        if (p.delay > 0) { p.delay -= dt; continue; }
+        p.age += dt;
         let a;
         if (p.phase === 0) {
-          p.x += (p.tx - p.x) * .085;
-          p.y += (p.ty - p.y) * .085;
+          const ap = 1 - Math.pow(1 - .085, dt);
+          p.x += (p.tx - p.x) * ap;
+          p.y += (p.ty - p.y) * ap;
           if (p.age > 85) { p.phase = 1; p.age = 0; }
           a = Math.min(1, p.age / 25);
         } else if (p.phase === 1) {
@@ -1579,8 +1588,8 @@
             p.vx = rand(-2.4, 2.4); p.vy = rand(-1.6, .6);
           }
         } else {
-          p.x += p.vx; p.y += p.vy;
-          p.vy += .05; p.vx *= .99;
+          p.x += p.vx * dt; p.y += p.vy * dt;
+          p.vy += .05 * dt; p.vx *= Math.pow(.99, dt);
           a = Math.max(0, 1 - p.age / 55);
           if (p.age > 55) { textParticles.splice(i, 1); continue; }
         }
@@ -1600,7 +1609,7 @@
 
     requestAnimationFrame(frame);
   }
-  frame();
+  requestAnimationFrame(frame);
 
   // iOS-safe tap binding: handles touch directly, ignores swipes, prevents double-fire
   function onTap(el, fn) {
@@ -1749,6 +1758,7 @@
         loopStart = actx.currentTime + .3;
         evIdx = 0;
         scheduler();
+        setTimeout(() => VOICE_NAMES.forEach(k => decodeVoice(k)), 400);
         musicTimer = setInterval(scheduler, 200);
       } catch (e) {}
     }
@@ -1788,7 +1798,10 @@
       }
     }
     musicBtn.classList.toggle('off', muted);
-    if (muted && nowPlaying) { try { nowPlaying.pause(); } catch (err) {} }
+    if (muted) {
+      if (curVoice) { try { curVoice.stop(); } catch (err) {} }
+      if (curVoiceEl) { try { curVoiceEl.pause(); } catch (err) {} }
+    }
   });
 
   // soft sound effects (share the piano's volume + mute button)
@@ -2073,30 +2086,57 @@
     addEventListener('pointerdown', kick);
   }
 
-  // ---- the girls' voices ----
-  const VOICES = {};
-  ['lagoona1','lagoona2','lagoona3','draculaura1','draculaura2','draculaura3','draculaura4',
-   'frankie1','frankie2','frankie3','clawdeen1','clawdeen2','clawdeen3',
-   'cleo1','cleo2','cleo3'].forEach(k => {
-    const a = new Audio('voices/' + k + '.mp3');
-    a.preload = 'auto';
-    a.setAttribute('playsinline', '');
-    VOICES[k] = a;
+  // ---- the girls' voices: played through the same engine as the piano ----
+  const VOICE_NAMES = ['lagoona1','lagoona2','lagoona3','draculaura1','draculaura2','draculaura3','draculaura4',
+   'frankie1','frankie2','frankie3','clawdeen1','clawdeen2','clawdeen3','cleo1','cleo2','cleo3'];
+  const VOICE_DATA = {}, VOICE_BUF = {};
+  VOICE_NAMES.forEach(k => {
+    fetch('voices/' + k + '.mp3')
+      .then(r => r.arrayBuffer())
+      .then(b => { VOICE_DATA[k] = b; })
+      .catch(() => {});
   });
-  let nowPlaying = null;
+  function decodeVoice(k, cb) {
+    if (VOICE_BUF[k]) { if (cb) cb(VOICE_BUF[k]); return; }
+    if (!actx || !VOICE_DATA[k]) return;
+    actx.decodeAudioData(VOICE_DATA[k].slice(0), buf => {
+      VOICE_BUF[k] = buf;
+      if (cb) cb(buf);
+    }, () => {});
+  }
+  let curVoice = null, curVoiceEl = null;
+  const FILE_MODE = location.protocol === 'file:';
   function playVoice(k) {
     if (!k || muted) return;
-    const a = VOICES[k];
-    if (!a) return;
-    if (nowPlaying && nowPlaying !== a) { try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch (e) {} }
-    nowPlaying = a;
-    try { a.currentTime = 0; a.volume = .95; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+    if (FILE_MODE) {
+      // local testing: fetch is blocked on file://, fall back to plain audio
+      try {
+        if (curVoiceEl) { curVoiceEl.pause(); curVoiceEl.currentTime = 0; }
+        curVoiceEl = new Audio('voices/' + k + '.mp3');
+        const p = curVoiceEl.play();
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
+      return;
+    }
+    if (!actx || actx.state !== 'running' || !master) return;
+    decodeVoice(k, buf => {
+      if (curVoice) { try { curVoice.stop(); } catch (e) {} }
+      const s = actx.createBufferSource();
+      s.buffer = buf;
+      const g = actx.createGain();
+      g.gain.value = 2.2;
+      s.connect(g); g.connect(master);
+      s.start();
+      curVoice = s;
+    });
   }
-
   // ---- episode engine: the girls speak in order, never over each other ----
   const subEl = document.getElementById('mhsubs');
   const subQ = [];
   let subPlaying = false;
+  function speakIfFree(lines) {
+    if (!subPlaying && subQ.length === 0) speak(lines);
+  }
   function speak(lines, urgent) {
     if (!subEl) return;
     if (urgent) subQ.length = 0;
@@ -2205,10 +2245,10 @@
       if (lit === 5) line = '5 left. Almost there.';
       if (lit === 1) line = 'One. Last. Candle.';
       countEl.textContent = line;
-      if (lit === 15) speak([['Draculaura', '#ff7bac', "15 left! You've got this!", 2370, 'draculaura2']], true);
-      if (lit === 10) speak([['Frankie', '#9fe8c4', 'Halfway!! Keep going!', 2240, 'frankie2']], true);
-      if (lit === 5) speak([['Clawdeen', '#c084fc', 'Almost there.', 1770, 'clawdeen2']], true);
-      if (lit === 1) speak([['Cleo', '#f5c66a', 'The last one, darling. Make it count.', 3260, 'cleo2']], true);
+      if (lit === 15) speakIfFree([['Draculaura', '#ff7bac', "15 left! You've got this!", 2370, 'draculaura2']]);
+      if (lit === 10) speakIfFree([['Frankie', '#9fe8c4', 'Halfway!! Keep going!', 2240, 'frankie2']]);
+      if (lit === 5) speakIfFree([['Clawdeen', '#c084fc', 'Almost there.', 1770, 'clawdeen2']]);
+      if (lit === 1) speakIfFree([['Cleo', '#f5c66a', 'The last one, darling. Make it count.', 3260, 'cleo2']]);
     } else {
       countEl.textContent = 'All 21 out.';
       wishMsg.innerHTML = 'Happy 21st birthday, Mihrişah.<br><span class="tried">laugh all you want, I tried my best</span>';
