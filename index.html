@@ -987,6 +987,14 @@
     transition: opacity 1.2s ease;
   }
   #wishMsg.show { opacity: 1; }
+  #wishMsg .tried {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: .5em;
+    color: rgba(239,230,238,.6);
+  }
   .doll.jump { animation: dolljump .55s ease; }
   @keyframes dolljump {
     0% { transform: translateY(0); }
@@ -1780,6 +1788,7 @@
       }
     }
     musicBtn.classList.toggle('off', muted);
+    if (muted && nowPlaying) { try { nowPlaying.pause(); } catch (err) {} }
   });
 
   // soft sound effects (share the piano's volume + mute button)
@@ -2064,6 +2073,69 @@
     addEventListener('pointerdown', kick);
   }
 
+  // ---- the girls' voices ----
+  const VOICES = {};
+  ['lagoona1','lagoona2','lagoona3','draculaura1','draculaura2','draculaura3','draculaura4',
+   'frankie1','frankie2','frankie3','clawdeen1','clawdeen2','clawdeen3',
+   'cleo1','cleo2','cleo3'].forEach(k => {
+    const a = new Audio('voices/' + k + '.mp3');
+    a.preload = 'auto';
+    a.setAttribute('playsinline', '');
+    VOICES[k] = a;
+  });
+  let nowPlaying = null;
+  function playVoice(k) {
+    if (!k || muted) return;
+    const a = VOICES[k];
+    if (!a) return;
+    if (nowPlaying && nowPlaying !== a) { try { nowPlaying.pause(); nowPlaying.currentTime = 0; } catch (e) {} }
+    nowPlaying = a;
+    try { a.currentTime = 0; a.volume = .95; const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+  }
+
+  // ---- episode engine: the girls speak in order, never over each other ----
+  const subEl = document.getElementById('mhsubs');
+  const subQ = [];
+  let subPlaying = false;
+  function speak(lines, urgent) {
+    if (!subEl) return;
+    if (urgent) subQ.length = 0;
+    subQ.push(...lines);
+    if (!subPlaying) nextLine();
+  }
+  function nextLine() {
+    const l = subQ.shift();
+    if (!l) { subPlaying = false; return; }
+    subPlaying = true;
+    subEl.innerHTML = '<span class="who" style="color:' + l[1] + '">' + l[0] + ':</span> “' + l[2] + '”';
+    subEl.classList.add('show');
+    playVoice(l[4]);
+    setTimeout(() => {
+      subEl.classList.remove('show');
+      setTimeout(nextLine, 320);
+    }, l[3] || 2000);
+  }
+
+  // Act 1: they greet her when she arrives at the cake
+  let episodeStarted = false;
+  const epTarget = document.querySelector('.mhscene');
+  if (epTarget) {
+    const epObs = new IntersectionObserver(es => es.forEach(en => {
+      if (en.isIntersecting && !episodeStarted) {
+        episodeStarted = true;
+        speak([
+          ['Frankie', '#9fe8c4', "She's here! Places, everyone!", 3080, 'frankie1'],
+          ['Draculaura', '#ff7bac', 'Mihrişah! Finally!', 2110, 'draculaura1'],
+          ['Lagoona', '#7fd8be', 'We made you a cake, love.', 2160, 'lagoona1'],
+          ['Cleo', '#f5c66a', 'I supervised... obviously.', 3260, 'cleo1'],
+          ['Clawdeen', '#c084fc', 'Alright, go on then. 21 candles. Blow them all out.', 4720, 'clawdeen1']
+        ]);
+        epObs.disconnect();
+      }
+    }), { threshold: .5 });
+    epObs.observe(epTarget);
+  }
+
   // dolls jump when pressed
   document.querySelectorAll('[data-doll]').forEach(doll => {
     onTap(doll, () => {
@@ -2133,27 +2205,22 @@
       if (lit === 5) line = '5 left. Almost there.';
       if (lit === 1) line = 'One. Last. Candle.';
       countEl.textContent = line;
+      if (lit === 15) speak([['Draculaura', '#ff7bac', "15 left! You've got this!", 2370, 'draculaura2']], true);
+      if (lit === 10) speak([['Frankie', '#9fe8c4', 'Halfway!! Keep going!', 2240, 'frankie2']], true);
+      if (lit === 5) speak([['Clawdeen', '#c084fc', 'Almost there.', 1770, 'clawdeen2']], true);
+      if (lit === 1) speak([['Cleo', '#f5c66a', 'The last one, darling. Make it count.', 3260, 'cleo2']], true);
     } else {
       countEl.textContent = 'All 21 out.';
-      wishMsg.textContent = 'Happy 21st birthday, Mihrişah.';
+      wishMsg.innerHTML = 'Happy 21st birthday, Mihrişah.<br><span class="tried">laugh all you want, I tried my best</span>';
       wishMsg.classList.add('show');
       setTimeout(() => spellText('21'), 900);
-      // the girls say happy birthday, left to right, movie-subtitle style
-      const SUBS = [
-        ['Lagoona', '#7fd8be', 'Happy birthday, Mihrişah!'],
-        ['Draculaura', '#ff7bac', 'Happy birthday!!'],
-        ['Frankie', '#9fe8c4', 'Happy birthday!'],
-        ['Clawdeen', '#c084fc', 'Happy birthday, superstar.'],
-        ['Cleo', '#f5c66a', 'Happy birthday, darling.']
-      ];
-      const subEl = document.getElementById('mhsubs');
-      SUBS.forEach((s, i) => {
-        setTimeout(() => {
-          subEl.innerHTML = '<span class="who" style="color:' + s[1] + '">' + s[0] + ':</span> “' + s[2] + '”';
-          subEl.classList.add('show');
-        }, 1600 + i * 2100);
-      });
-      setTimeout(() => subEl.classList.remove('show'), 1600 + SUBS.length * 2100 + 600);
+      setTimeout(() => speak([
+        ['Lagoona', '#7fd8be', 'Happy birthday, Mihrişah!', 2240, 'lagoona2'],
+        ['Draculaura', '#ff7bac', 'Happy birthday, Mihrişah!!', 2240, 'draculaura3'],
+        ['Frankie', '#9fe8c4', 'Happy birthday!', 1690, 'frankie3'],
+        ['Clawdeen', '#c084fc', 'Happy birthday, superstar.', 2420, 'clawdeen3'],
+        ['Cleo', '#f5c66a', 'Happy birthday, darling.', 2480, 'cleo3']
+      ], true), 1500);
       confettiBurst(160);
       setTimeout(() => confettiBurst(120), 1200);
       setTimeout(() => confettiBurst(120), 2600);
@@ -2186,6 +2253,7 @@
             : 'Click on it, hold, and drag across it.';
           countEl.innerHTML = 'By the way, you need to slice the cake if you want a piece of it. ' + how + "<br>Right to left, left to right, doesn't matter. Just slice it.";
           countEl.classList.add('attn');
+          speak([['Lagoona', '#7fd8be', 'Now cut the cake, love. The first slice is yours.', 3390, 'lagoona3']]);
         }
       }, 13000);
     }
@@ -2200,6 +2268,7 @@
       document.getElementById('cakesvg').classList.add('sliced');
       countEl.classList.remove('attn');
       countEl.textContent = 'there. the first slice is yours.';
+      speak([['Draculaura', '#ff7bac', 'Wait, save me a piece!!', 1740, 'draculaura4']], true);
       const r = cakeDoll.getBoundingClientRect();
       explode(r.left + r.width * .82, r.top + r.height * .85, '#f2a9c4');
     }
