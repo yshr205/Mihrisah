@@ -493,19 +493,21 @@
   /* hidden star */
   .hero { position: relative; }
   #luckystar {
+    padding: 12px;
+    margin: -12px;
     position: absolute;
     top: 15%;
     right: 13%;
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    background: radial-gradient(circle, #fff9d8 0%, rgba(255,243,176,.85) 35%, transparent 70%);
+    width: 6px;
+    height: 6px;
+    cursor: default;
+    background: radial-gradient(circle, rgba(255,249,216,.75) 0%, rgba(255,243,176,.4) 40%, transparent 70%);
     border-radius: 50%;
-    animation: luckypulse 2.3s ease-in-out infinite;
+    animation: luckypulse 3.6s ease-in-out infinite;
   }
   @keyframes luckypulse {
-    0%, 100% { transform: scale(.8); opacity: .7; }
-    50% { transform: scale(1.25); opacity: 1; }
+    0%, 100% { transform: scale(.9); opacity: .45; }
+    50% { transform: scale(1.1); opacity: .85; }
   }
   .shootingstar {
     position: fixed;
@@ -608,15 +610,20 @@
   .message, .wishsec, .closing, footer { position: relative; }
   .cstar {
     position: absolute;
-    font-size: 13px;
+    font-size: 5px;
     line-height: 1;
-    color: rgba(255,243,176,.55);
-    cursor: pointer;
+    color: rgba(255,246,214,.26);
+    cursor: default;
     z-index: 3;
     user-select: none;
     -webkit-user-select: none;
-    animation: luckypulse 2.8s ease-in-out infinite;
+    animation: faintblink 6s ease-in-out infinite;
   }
+  @keyframes faintblink {
+    0%, 100% { opacity: .5; }
+    50% { opacity: .95; }
+  }
+  .cstar { padding: 11px; margin: -11px; }
   .cstar.found { animation: starfound .6s ease forwards; pointer-events: none; }
   @keyframes starfound {
     50% { transform: scale(1.9); opacity: 1; }
@@ -822,6 +829,71 @@
   }
   .pair .pimg img, .prow img { transition: transform .5s ease; }
   .pair .pimg img:hover, .prow img:hover { transform: scale(1.02); }
+  #credits {
+    display: none;
+    width: min(520px, 92vw);
+    margin: 8px auto 0;
+  }
+  #credits.show { display: block; }
+  .crollwrap {
+    position: relative;
+    height: min(300px, 46vh);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  }
+  .croll {
+    position: absolute;
+    left: 0; right: 0;
+    top: 100%;
+    text-align: center;
+  }
+  #credits.show .croll { animation: crollup 30s linear forwards; }
+  @keyframes crollup { to { transform: translateY(-100%) translateY(-320px); } }
+  .croll p { margin: 0; }
+  .cttl {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    letter-spacing: .08em;
+    background: linear-gradient(120deg, var(--gold), #fff3b0, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .csub {
+    font-style: italic;
+    color: var(--soft);
+    margin-bottom: 34px !important;
+    font-size: clamp(.9rem, 3vw, 1.05rem);
+  }
+  .cline {
+    margin-top: 26px !important;
+    font-size: .78rem;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+  }
+  .cname {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(1.05rem, 3.6vw, 1.3rem);
+    margin-top: 6px !important;
+  }
+  .cstar {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    margin-top: 6px !important;
+    background: linear-gradient(120deg, var(--gold), var(--rose));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cend {
+    margin-top: 44px !important;
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    color: var(--rose);
+  }
+
   #wishMsg {
     font-family: 'Great Vibes', cursive;
     font-style: normal;
@@ -1279,6 +1351,27 @@
         </div>
       </div>
       <div id="mhsubs"></div>
+      <div id="credits">
+        <div class="crollwrap"><div class="croll">
+          <p class="cttl">Monster High</p>
+          <p class="csub">A Birthday Special</p>
+          <p class="cline">Starring</p>
+          <p class="cname" style="color:#7fd8be">Lagoona Blue</p>
+          <p class="cname" style="color:#ff7bac">Draculaura</p>
+          <p class="cname" style="color:#9fe8c4">Frankie Stein</p>
+          <p class="cname" style="color:#c084fc">Clawdeen Wolf</p>
+          <p class="cname" style="color:#f5c66a">Cleo de Nile</p>
+          <p class="cline">Special guest of honour</p>
+          <p class="cstar">Mihrişah</p>
+          <p class="cline">Fireworks by</p>
+          <p class="cname" style="color:#f5c66a">The Gnomes</p>
+          <p class="cline">Cake by</p>
+          <p class="cname" style="color:#f2a9c4">The Ghouls</p>
+          <p class="cline">Written and built by</p>
+          <p class="cname" style="color:#f2a9c4">Youcef</p>
+          <p class="cend">Happy 21st Birthday</p>
+        </div></div>
+      </div>
       <p id="candleCount" class="caption" style="margin-top:14px">21 candles. Start pressing.</p>
       <p id="wishMsg"></p>
     </div>
@@ -2309,6 +2402,10 @@
       countEl.classList.remove('attn');
       countEl.textContent = 'there. the first slice is yours.';
       speak([['Draculaura', '#ff7bac', 'Wait, save me a piece!!', 1740, 'draculaura4']], true);
+      setTimeout(() => {
+        const cr = document.getElementById('credits');
+        if (cr && !cr.classList.contains('show')) cr.classList.add('show');
+      }, 2600);
       const r = cakeDoll.getBoundingClientRect();
       explode(r.left + r.width * .82, r.top + r.height * .85, '#f2a9c4');
     }
