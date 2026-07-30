@@ -1858,6 +1858,10 @@
         master = actx.createGain();
         master.gain.value = .16;
         master.connect(actx.destination);
+        // voices ride their own bus so ducking the piano never touches them
+        voiceBus = actx.createGain();
+        voiceBus.gain.value = muted ? 0 : 1;
+        voiceBus.connect(actx.destination);
         loopStart = actx.currentTime + .3;
         evIdx = 0;
         scheduler();
@@ -1882,7 +1886,10 @@
       }
     }
   }
-  addEventListener('pointerdown', startMusic);
+  addEventListener('pointerdown', () => {
+    startMusic();
+    setTimeout(() => VOICE_NAMES.forEach(k => decodeVoice(k)), 250);
+  });
   addEventListener('click', startMusic);
   addEventListener('touchend', startMusic, { passive: true });
   addEventListener('touchstart', startMusic, { passive: true });
@@ -1901,6 +1908,10 @@
       }
     }
     musicBtn.classList.toggle('off', muted);
+    if (voiceBus && actx) {
+      voiceBus.gain.cancelScheduledValues(actx.currentTime);
+      voiceBus.gain.setTargetAtTime(muted ? 0 : 1, actx.currentTime, .05);
+    }
     if (muted) {
       if (curVoice) { try { curVoice.stop(); } catch (err) {} }
       if (curVoiceEl) { try { curVoiceEl.pause(); } catch (err) {} }
@@ -2207,11 +2218,12 @@
       if (cb) cb(buf);
     }, () => {});
   }
-  let curVoice = null, curVoiceEl = null;
+  let curVoice = null, curVoiceEl = null, voiceBus = null;
   const FILE_MODE = location.protocol === 'file:';
   function playVoice(k) {
     if (!k || muted) return;
-    if (FILE_MODE) {
+    const engineReady = actx && actx.state === 'running' && master;
+    if (FILE_MODE || !engineReady) {
       // local testing: fetch is blocked on file://, fall back to plain audio
       try {
         if (curVoiceEl) { curVoiceEl.pause(); curVoiceEl.currentTime = 0; }
@@ -2222,22 +2234,22 @@
       } catch (e) {}
       return;
     }
-    if (!actx || actx.state !== 'running' || !master) return;
     decodeVoice(k, buf => {
       if (curVoice) { try { curVoice.stop(); } catch (e) {} }
       const s = actx.createBufferSource();
       s.buffer = buf;
       const g = actx.createGain();
-      g.gain.value = 4.5;
-      s.connect(g); g.connect(master);
-      // duck the piano so her voice sits on top
-      if (organGain || master) {
+      g.gain.value = 2.6;
+      s.connect(g);
+      g.connect(voiceBus || master);
+      // duck ONLY the piano; her voice is on its own bus
+      if (master) {
         const dg = master.gain;
         const t = actx.currentTime;
-        dg.cancelScheduledValues(t);
-        dg.setTargetAtTime(.055, t, .08);
         const dur = buf.duration || 2;
-        dg.setTargetAtTime(muted ? 0 : .16, t + dur + .15, .25);
+        dg.cancelScheduledValues(t);
+        dg.setTargetAtTime(.04, t, .08);
+        dg.setTargetAtTime(muted ? 0 : .16, t + dur + .2, .3);
       }
       s.start();
       curVoice = s;
@@ -2248,7 +2260,7 @@
   const subQ = [];
   let subPlaying = false;
   function speakIfFree(lines) {
-    if (!subPlaying && subQ.length === 0) speak(lines);
+    if (subQ.length < 2) speak(lines);
   }
   function speak(lines, urgent) {
     if (!subEl) return;
@@ -2271,21 +2283,22 @@
 
   // Act 1: they greet her when she arrives at the cake
   let episodeStarted = false;
+  function startEpisode() {
+    if (episodeStarted) return;
+    episodeStarted = true;
+    speak([
+      ['Frankie', '#9fe8c4', "She's here! Places, everyone!", 3130, 'frankie1'],
+      ['Draculaura', '#ff7bac', 'Mihrişah! Finally!', 2160, 'draculaura1'],
+      ['Lagoona', '#7fd8be', 'We made you a cake, love.', 2220, 'lagoona1'],
+      ['Cleo', '#f5c66a', 'I supervised... obviously.', 3470, 'cleo1'],
+      ['Clawdeen', '#c084fc', 'Alright, go on then. 21 candles. Blow them all out.', 5040, 'clawdeen1']
+    ]);
+  }
   const epTarget = document.querySelector('.mhscene');
   if (epTarget) {
     const epObs = new IntersectionObserver(es => es.forEach(en => {
-      if (en.isIntersecting && !episodeStarted) {
-        episodeStarted = true;
-        speak([
-          ['Frankie', '#9fe8c4', "She's here! Places, everyone!", 3130, 'frankie1'],
-          ['Draculaura', '#ff7bac', 'Mihrişah! Finally!', 2160, 'draculaura1'],
-          ['Lagoona', '#7fd8be', 'We made you a cake, love.', 2220, 'lagoona1'],
-          ['Cleo', '#f5c66a', 'I supervised... obviously.', 3470, 'cleo1'],
-          ['Clawdeen', '#c084fc', 'Alright, go on then. 21 candles. Blow them all out.', 5040, 'clawdeen1']
-        ]);
-        epObs.disconnect();
-      }
-    }), { threshold: .5 });
+      if (en.isIntersecting) { startEpisode(); epObs.disconnect(); }
+    }), { threshold: 0, rootMargin: '-10% 0px -10% 0px' });
     epObs.observe(epTarget);
   }
 
@@ -2335,6 +2348,7 @@
   const wishMsg = document.getElementById('wishMsg');
   const cakeDoll = document.getElementById('cakeDoll');
   onTap(cakeDoll, () => {
+    startEpisode();
     if (lit <= 0) return;
     lit--;
     sfx('puff');
