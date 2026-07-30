@@ -1,3 +1,3 @@
-# For Mihrisah
+# For Mihrişah
 
 A birthday page.
