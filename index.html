@@ -6,6 +6,15 @@
 <title>For Mihrişah 🖤</title>
 <meta property="og:title" content="For Mihrişah 🖤">
 <meta property="og:description" content="Happy 21st birthday. Open me.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yshr205.github.io/Mihrisah/">
+<meta property="og:image" content="https://yshr205.github.io/Mihrisah/photos/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="For Mihrişah 🖤">
+<meta name="twitter:description" content="Happy 21st birthday. Open me.">
+<meta name="twitter:image" content="https://yshr205.github.io/Mihrisah/photos/preview.jpg">
 <meta name="description" content="Happy 21st birthday. Open me.">
 <meta name="theme-color" content="#0a0a14">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🖤%3C/text%3E%3C/svg%3E">
@@ -42,6 +51,16 @@
     overflow-x: hidden;
   }
 
+  #tocurtain {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: #050308;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.1s ease;
+  }
+  #tocurtain.go { opacity: 1; visibility: visible; }
   #intro {
     position: fixed;
     inset: 0;
@@ -403,10 +422,42 @@
     animation: bob 2s ease-in-out infinite;
   }
   /* the opening sequence */
-  #envelope.opening .seal { animation: sealpop .5s ease forwards; }
-  @keyframes sealpop {
-    40% { transform: translate(-50%, -50%) scale(1.25) rotate(8deg); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1.7) rotate(24deg); opacity: 0; }
+  .seal::after {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,120,120,.45), transparent 62%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  #envelope.opening .seal::after { animation: sealglow .55s ease forwards; }
+  @keyframes sealglow {
+    0% { opacity: 0; transform: scale(.7); }
+    35% { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+  .sealcrack {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 2px;
+    height: 0;
+    background: linear-gradient(180deg, rgba(255,235,220,.95), rgba(120,10,26,.9));
+    transform-origin: top center;
+    pointer-events: none;
+    z-index: 7;
+  }
+  #envelope.opening .sealcrack { animation: crackopen .3s ease forwards; }
+  @keyframes crackopen {
+    from { height: 0; opacity: 1; }
+    to { height: 17%; opacity: 0; }
+  }
+  #envelope.opening .seal { animation: sealbreak .62s ease forwards; }
+  @keyframes sealbreak {
+    0% { transform: translate(-50%, -50%) scale(1) rotate(0); }
+    18% { transform: translate(-50%, -50%) scale(1.16) rotate(-5deg); }
+    34% { transform: translate(-50%, -52%) scale(1.06) rotate(4deg); }
+    100% { transform: translate(-50%, -46%) scale(1.75) rotate(26deg); opacity: 0; }
   }
   #envelope.opening .flap { animation: flapopen .75s ease .3s forwards; }
   @keyframes flapopen { to { transform: rotateX(-168deg); } }
@@ -1049,6 +1100,19 @@
     50% { transform: perspective(800px) rotateY(5deg); }
   }
   #cakeDoll:active { transform: scale(.96); }
+  #cakeDoll.squish { animation: cakesquish .26s ease; }
+  @keyframes cakesquish {
+    0% { transform: scaleY(1) scaleX(1); }
+    38% { transform: scaleY(.955) scaleX(1.035); }
+    100% { transform: scaleY(1) scaleX(1); }
+  }
+  .candleShake { animation: candleshake .34s ease; }
+  @keyframes candleshake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    22% { transform: translateX(-1.4px) rotate(-5deg); }
+    55% { transform: translateX(1.4px) rotate(5deg); }
+    80% { transform: translateX(-.6px) rotate(-2deg); }
+  }
   #cakeDoll.jump { animation: dolljump .55s ease; }
   .flame {
     transition: opacity .5s ease;
@@ -1141,6 +1205,11 @@
     letter-spacing: .08em;
   }
 
+  html.lowfx .aurora, html.lowfx #grain { display: none; }
+  html.lowfx .prow img, html.lowfx .pair .pimg img { box-shadow: none; }
+  html.lowfx #letterBody { box-shadow: none; }
+  html.lowfx .polaroid { box-shadow: 0 4px 10px rgba(0,0,0,.5); }
+
   @media (max-width: 600px) {
     section { padding: 7vh 20px; }
     .message p { line-height: 1.8; }
@@ -1152,6 +1221,7 @@
 <body>
 
 <div id="intro"><span>For Mihrişah</span></div>
+<div id="tocurtain"></div>
 <button id="musicBtn" aria-label="toggle music">♪</button>
 <div id="musicHint">touch anywhere<br>for the piano ♪</div>
 <div class="stars"></div>
@@ -1181,6 +1251,7 @@
         <div class="envname">Mihrişah</div>
         <div class="flap"></div>
         <div class="seal">M</div>
+        <div class="sealcrack"></div>
       </div>
       <p class="envhint">touch the seal</p>
     </div>
@@ -1392,7 +1463,7 @@
     <div class="reveal">
       <p>I hope everything comes right for you. I hope this final year is wholesome for you, and that your graduation turns out to be the best, and everything after it too. Keep going with what you're doing, because you're good at it. And one day I hope I see your name on a big movie as the director. I know you can do it.</p>
       <p class="wish">Happy 21st Birthday ✦</p>
-      <a class="skylink" href="sky.html">✦ one more thing. press here. your sky awaits ✦</a>
+      <a class="skylink" href="sky.html" id="skyLink">✦ one more thing. press here. your sky awaits ✦</a>
     </div>
   </section>
 </main>
@@ -1429,7 +1500,7 @@
   const risers = [], textParticles = [], trail = [];
   let trailSkip = 0;
   function addTrail(x, y) {
-    if (++trailSkip % (mobile ? 3 : 2) || trail.length > (mobile ? 60 : 80)) return;
+    if (++trailSkip % (lowMode ? 5 : mobile ? 3 : 2) || trail.length > (lowMode ? 34 : mobile ? 60 : 80)) return;
     trail.push({
       x: x + rand(-4, 4), y: y + rand(-4, 4),
       vx: rand(-.3, .3), vy: rand(.1, .8),
@@ -1524,7 +1595,7 @@
     const style = Math.random();
     const ring = style < .16;               // clean expanding circle
     const crackle = !ring && style < .32;   // shell that re-explodes into mini sparks
-    const n = (mobile ? 40 : 60) + ((Math.random() * (mobile ? 25 : 40)) | 0);
+    const n = (lowMode ? 26 : mobile ? 40 : 60) + ((Math.random() * (lowMode ? 14 : mobile ? 25 : 40)) | 0);
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
       const s = ring ? rand(3.8, 4.4) : rand(1.5, 6);
@@ -1543,8 +1614,23 @@
     sfx('boom');
   }
 
-  let tick = 0, lastT = 0;
+  let tick = 0, lastT = 0, fpsAcc = 0, fpsN = 0, lowMode = false;
   function frame(now) {
+    // watch the frame rate; simplify effects if the phone struggles
+    if (lastT && now) {
+      fpsAcc += now - lastT; fpsN++;
+      if (fpsN >= 45) {
+        const avg = fpsAcc / fpsN;
+        fpsAcc = 0; fpsN = 0;
+        if (!lowMode && avg > 27) {
+          lowMode = true;
+          document.documentElement.classList.add('lowfx');
+        } else if (lowMode && avg < 20) {
+          lowMode = false;
+          document.documentElement.classList.remove('lowfx');
+        }
+      }
+    }
     // real-clock physics: same speed at 60fps, 30fps, any fps
     let dt = lastT ? (now - lastT) / 16.667 : 1;
     lastT = now || 0;
@@ -1648,7 +1734,7 @@
       if (s.age >= s.life) { smokes.splice(i, 1); continue; }
       s.x += (s.vx + Math.sin(s.ph + s.age * .08) * .3) * dt;
       s.y += s.vy * dt;
-      ctx.globalAlpha = Math.sin(Math.PI * s.age / s.life) * .22;
+      ctx.globalAlpha = Math.sin(Math.PI * s.age / s.life) * .3;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.s + s.age * .05, 0, Math.PI * 2);
       ctx.fillStyle = '#9a94a6';
@@ -1747,9 +1833,21 @@
       setTimeout(() => sfx('crack'), 150);
       setTimeout(() => {
         const r = env.getBoundingClientRect();
-        explode(r.left + r.width / 2, r.top + r.height * .4, '#f5c66a');
+        const cx = r.left + r.width / 2, cy = r.top + r.height * .4;
+        // wax shards
+        for (let i = 0; i < 26; i++) {
+          const a = rand(0, Math.PI * 2), s = rand(1.4, 4.6);
+          particles.push({
+            x: cx, y: cy, px: cx, py: cy,
+            vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.2,
+            life: rand(28, 55), age: 0,
+            color: Math.random() < .75 ? (Math.random() < .5 ? '#a10f2b' : '#c9243f') : '#f2c9cf',
+            size: rand(1.1, 2.4)
+          });
+        }
+        explode(cx, cy, '#f5c66a');
         riserBurst(r, 40);
-      }, 550);
+      }, 380);
       setTimeout(() => {
         env.style.display = 'none';
         letterBody.classList.remove('sealed');
@@ -2134,6 +2232,25 @@
   }), { threshold: .12 });
   revEls.forEach(el => obsR.observe(el));
 
+  // cinematic fade into the sky page
+  const skyLink = document.getElementById('skyLink');
+  if (skyLink) {
+    const goSky = e => {
+      e.preventDefault();
+      const cur = document.getElementById('tocurtain');
+      cur.classList.add('go');
+      if (master && actx) {
+        try {
+          master.gain.cancelScheduledValues(actx.currentTime);
+          master.gain.setTargetAtTime(0, actx.currentTime, .3);
+        } catch (err) {}
+      }
+      setTimeout(() => { location.href = 'sky.html'; }, 1150);
+    };
+    skyLink.addEventListener('click', goSky);
+    skyLink.addEventListener('touchend', goSky);
+  }
+
   // sleep the cake scene while it is offscreen
   const wishSec = document.querySelector('.wishsec');
   if (wishSec) {
@@ -2317,7 +2434,7 @@
   const SVGNS = 'http://www.w3.org/2000/svg';
   const candleG = document.getElementById('candles');
   const candleColors = ['#c1121f', '#2b2b2b', '#6b4ba1', '#8a0f22', '#3a3a3a'];
-  const flames = [];
+  const flames = [], candleGroups = [];
   function addCandle(x, baseY, h) {
     const mk = n => document.createElementNS(SVGNS, n);
     const set = (el, attrs) => { for (const k in attrs) el.setAttribute(k, attrs[k]); return el; };
@@ -2330,8 +2447,11 @@
     const fo = set(mk('ellipse'), { cx: x, cy: fy, rx: 3.9, ry: 7, fill: '#ff8c2e', class: 'flame' });
     const fi = set(mk('ellipse'), { cx: x, cy: fy + .8, rx: 2.2, ry: 4.4, fill: 'url(#flameCore)', class: 'flame' });
     g.appendChild(glow); g.appendChild(stick); g.appendChild(hl); g.appendChild(wick); g.appendChild(fo); g.appendChild(fi);
+    g.style.transformBox = 'fill-box';
+    g.style.transformOrigin = 'bottom center';
     candleG.appendChild(g);
     flames.push([glow, fo, fi]);
+    candleGroups.push(g);
   }
   // candles ring the top tier ellipse for a 3D look: back row smaller, front row bigger
   for (let i = 0; i < 11; i++) {
@@ -2354,12 +2474,22 @@
     sfx('puff');
     const idx = 21 - lit - 1;
     flames[idx].forEach(el => el.classList.add('out'));
+    cakeDoll.classList.remove('squish');
+    void cakeDoll.offsetWidth;
+    cakeDoll.classList.add('squish');
+    const cg = candleGroups[idx];
+    if (cg) {
+      cg.classList.remove('candleShake');
+      void cg.getBoundingClientRect();
+      cg.classList.add('candleShake');
+      setTimeout(() => cg.classList.remove('candleShake'), 360);
+    }
     const fr = flames[idx][1].getBoundingClientRect();
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < 7; k++) {
       smokes.push({
         x: fr.left + fr.width / 2 + rand(-2, 2), y: fr.top,
-        vx: rand(-.25, .25), vy: rand(-.55, -.95),
-        age: 0, life: rand(55, 85), s: rand(1.6, 2.8), ph: rand(0, 6.28)
+        vx: rand(-.35, .35), vy: rand(-.6, -1.15),
+        age: 0, life: rand(70, 110), s: rand(1.8, 3.4), ph: rand(0, 6.28)
       });
     }
     cakeDoll.classList.remove('jump');

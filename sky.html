@@ -100,9 +100,16 @@
     z-index: 60;
     background: #050308;
     pointer-events: none;
-    animation: fadeaway 1.5s ease .15s forwards;
+    animation: fadeaway 2.3s ease .25s forwards;
   }
   @keyframes fadeaway { to { opacity: 0; visibility: hidden; } }
+  /* the scene rises out of the dark as the curtain lifts */
+  #scenewrap, #grade, .stars, .redcloud, #moonGlow, #lavaGlow, #halo, #beam, #castle {
+    animation-delay: .2s;
+  }
+  #scenewrap { opacity: 0; animation: sceneIn 2.6s ease .3s forwards, kenburns 46s ease-in-out 2.9s infinite alternate; }
+  @keyframes sceneIn { from { opacity: 0; } to { opacity: 1; } }
+  #cap { animation: capfade 2s ease 9.5s forwards; }
   #lavaGlow {
     position: absolute;
     pointer-events: none;
@@ -274,6 +281,10 @@
     .fog, .redcloud, .cloud, #lavaGlow { filter: none; }
     #grain { display: none; }
   }
+  html.lowfx .fog, html.lowfx .redcloud, html.lowfx .cloud,
+  html.lowfx #lavaGlow, html.lowfx #extL, html.lowfx #extR { filter: none; }
+  html.lowfx #grain, html.lowfx #halo, html.lowfx #beam { display: none; }
+  html.lowfx .flybat, html.lowfx .shoot { display: none; }
 
   #castle {
     position: fixed;
@@ -392,6 +403,17 @@
   }
   #cap p { animation: capin 1.3s cubic-bezier(.2, .8, .3, 1) .7s both; }
 
+  #tocurtain {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: #050308;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+  #tocurtain.go { opacity: 1; visibility: visible; }
   #back {
     position: fixed;
     top: 14px;
@@ -601,6 +623,7 @@
 <div id="grain"></div>
 <div id="vig"></div>
 <div id="fadein"></div>
+<div id="tocurtain"></div>
 
 <div id="s21">That was your 21st. Happy birthday, Mihrişah.<br><span>— the gnomes</span></div>
 <div id="cap">
@@ -685,7 +708,15 @@
   ['click', 'touchend'].forEach(ev => back.addEventListener(ev, e => {
     e.preventDefault();
     e.stopPropagation();
-    location.href = 'index.html';
+    const cur = document.getElementById('tocurtain');
+    if (cur) cur.classList.add('go');
+    if (master && actx) {
+      try {
+        master.gain.cancelScheduledValues(actx.currentTime);
+        master.gain.setTargetAtTime(0, actx.currentTime, .25);
+      } catch (err) {}
+    }
+    setTimeout(() => { location.href = 'index.html'; }, 950);
   }));
 
   const colors = ['#e63946', '#c1121f', '#ff6b6b', '#8a0f22', '#f5c66a', '#9d4edd', '#ffd166', '#ff4d6d', '#c77dff', '#48cae4'];
@@ -715,7 +746,7 @@
     if (chrys || Math.random() < .45) {
       do { colorB = colors[(Math.random() * colors.length) | 0]; } while (colorB === color);
     }
-    const base = pistil ? 34 : big ? 150 : 85;
+    const base = pistil ? (lowMode ? 22 : 34) : big ? (lowMode ? 90 : 150) : (lowMode ? 52 : 85);
     const n = base + ((Math.random() * 40) | 0);
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
@@ -779,8 +810,17 @@
   }
 
   const ashes = [];
-  let tick = 0, ashAcc = 0, lastT = 0;
+  let tick = 0, ashAcc = 0, lastT = 0, fpsAcc = 0, fpsN = 0, lowMode = false;
   function frame(now) {
+    if (lastT && now) {
+      fpsAcc += now - lastT; fpsN++;
+      if (fpsN >= 45) {
+        const avg = fpsAcc / fpsN;
+        fpsAcc = 0; fpsN = 0;
+        if (!lowMode && avg > 27) { lowMode = true; document.documentElement.classList.add('lowfx'); }
+        else if (lowMode && avg < 20) { lowMode = false; document.documentElement.classList.remove('lowfx'); }
+      }
+    }
     let dt = lastT ? (now - lastT) / 16.667 : 1;
     lastT = now || 0;
     if (!(dt > 0)) dt = 1;
