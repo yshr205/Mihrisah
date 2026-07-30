@@ -2251,6 +2251,35 @@
     skyLink.addEventListener('touchend', goSky);
   }
 
+  // coming back from the sky page: undo the blackout, wake the music
+  function restorePage() {
+    const cur = document.getElementById('tocurtain');
+    if (cur) cur.classList.remove('go');
+    if (actx) {
+      if (actx.state !== 'running') { try { actx.resume(); } catch (e) {} }
+      if (master) {
+        try {
+          master.gain.cancelScheduledValues(actx.currentTime);
+          master.gain.setTargetAtTime(muted ? 0 : .16, actx.currentTime, .12);
+        } catch (e) {}
+      }
+      if (voiceBus) {
+        try { voiceBus.gain.setTargetAtTime(muted ? 0 : 1, actx.currentTime, .1); } catch (e) {}
+      }
+    }
+  }
+  addEventListener('pageshow', e => { if (e.persisted) restorePage(); });
+  addEventListener('visibilitychange', () => { if (!document.hidden) restorePage(); });
+  // watchdog: the music must never stay ducked once nobody is speaking
+  setInterval(() => {
+    if (!actx || !master || muted) return;
+    if (actx.state !== 'running') return;
+    if (subPlaying) return;
+    if (master.gain.value < .1) {
+      try { master.gain.setTargetAtTime(.16, actx.currentTime, .2); } catch (e) {}
+    }
+  }, 2500);
+
   // sleep the cake scene while it is offscreen
   const wishSec = document.querySelector('.wishsec');
   if (wishSec) {
