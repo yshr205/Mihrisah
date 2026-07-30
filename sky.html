@@ -671,7 +671,7 @@
     location.href = 'index.html';
   }));
 
-  const colors = ['#e63946', '#c1121f', '#ff6b6b', '#8a0f22', '#f5c66a', '#9d4edd'];
+  const colors = ['#e63946', '#c1121f', '#ff6b6b', '#8a0f22', '#f5c66a', '#9d4edd', '#ffd166', '#ff4d6d', '#c77dff', '#48cae4'];
   const rockets = [], particles = [], embers = [];
 
   // distant lightning behind the clouds, every so often
@@ -686,36 +686,50 @@
   }
   setTimeout(lightning, 9000);
 
-  function explode(x, y, big) {
+  function explode(x, y, big, pistil) {
     const style = Math.random();
-    const ring = style < .16;
-    const crackle = !ring && style < .34;
-    const heart = !ring && !crackle && style < .46;
-    const willow = !ring && !crackle && !heart && style < .58;
+    const ring = !pistil && style < .13;
+    const crackle = !pistil && !ring && style < .25;
+    const heart = !pistil && !ring && !crackle && style < .36;
+    const willow = !pistil && !ring && !crackle && !heart && style < .48;
+    const chrys = !pistil && !ring && !crackle && !heart && !willow && style < .68;
     const color = heart ? '#ff5c8a' : willow ? '#f0c674' : colors[(Math.random() * colors.length) | 0];
-    const base = big ? 130 : 70;
+    let colorB = null;
+    if (chrys || Math.random() < .45) {
+      do { colorB = colors[(Math.random() * colors.length) | 0]; } while (colorB === color);
+    }
+    const base = pistil ? 34 : big ? 150 : 85;
     const n = base + ((Math.random() * 40) | 0);
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + (ring ? 0 : rand(-.05, .05));
-      const s = ring ? rand(4, 4.6) : rand(1.5, big ? 7.5 : 6);
+      const sp = pistil ? rand(.8, 2.6) : ring ? rand(4, 4.6) : rand(1.5, big ? 8 : 6.2);
       let hvx, hvy;
       if (heart) {
         const t = (Math.PI * 2 * i) / n;
         hvx = 16 * Math.pow(Math.sin(t), 3) * .3;
         hvy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * .3;
       }
+      const lf = willow ? rand(110, 170) : pistil ? rand(36, 60) : rand(50, big ? 130 : 95);
+      const isOuter = sp > (big ? 5 : 4);
       particles.push({
-        x, y,
-        vx: heart ? hvx : Math.cos(a) * s, vy: heart ? hvy : Math.sin(a) * s,
-        life: willow ? rand(110, 170) : rand(50, big ? 120 : 95), age: 0,
+        x, y, px: x, py: y,
+        vx: heart ? hvx : Math.cos(a) * sp, vy: heart ? hvy : Math.sin(a) * sp,
+        life: lf, age: 0,
         dr: willow ? .963 : .985,
-        color: heart ? (Math.random() < .5 ? '#ff5c8a' : '#ff8fb0') : (Math.random() < .8 ? color : '#ffffff'),
-        c2: Math.random() < .3,
+        col: pistil ? '#ffe9a8'
+           : heart ? (Math.random() < .5 ? '#ff5c8a' : '#ff8fb0')
+           : chrys ? (isOuter ? color : colorB)
+           : (Math.random() < .82 ? color : '#ffffff'),
+        colB: (!heart && !chrys && colorB) ? colorB : null,
+        c2: !pistil && Math.random() < .3,
+        gl: (chrys || big) && Math.random() < .45,
         ck: crackle && Math.random() < .3,
         size: rand(1.2, big ? 3 : 2.6)
       });
     }
-    boom(big);
+    // the pistil: big shells bloom a golden core a beat after the main flower
+    if (big && !pistil) setTimeout(() => explode(x, y, false, true), 380);
+    if (!pistil) boom(big);
   }
 
   const gnomes = [...document.querySelectorAll('[data-g]')];
@@ -831,6 +845,7 @@
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
+      const ox = p.x, oy = p.y;
       const dr = Math.pow(p.dr || .985, dt);
       p.x += p.vx * dt; p.y += p.vy * dt;
       p.vx *= dr; p.vy = p.vy * dr + .06 * dt;
@@ -840,10 +855,10 @@
         if (p.ck) {
           for (let k = 0; k < 5; k++) {
             particles.push({
-              x: p.x, y: p.y,
+              x: p.x, y: p.y, px: p.x, py: p.y,
               vx: rand(-1.6, 1.6), vy: rand(-1.6, 1.2),
               life: rand(16, 30), age: 0,
-              color: Math.random() < .5 ? '#f5c66a' : p.color,
+              col: Math.random() < .5 ? '#f5c66a' : p.col,
               size: rand(.8, 1.4)
             });
           }
@@ -851,11 +866,19 @@
         particles.splice(i, 1);
         continue;
       }
+      // glitter strobe: sparks wink in the last half of their life
+      if (p.gl && p.age > p.life * .5 && ((p.age * .4) | 0) % 2) continue;
+      let col = p.col;
+      if (p.colB && p.age > p.life * .5) col = p.colB;
+      if (p.c2 && p.age < p.life * .28) col = '#ffffff';
       ctx.globalAlpha = a;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = p.size * 1.5;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = (p.c2 && p.age < p.life * .28) ? '#ffffff' : p.color;
-      ctx.fill();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
