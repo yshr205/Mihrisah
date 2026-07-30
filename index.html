@@ -610,20 +610,23 @@
   .message, .wishsec, .closing, footer { position: relative; }
   .cstar {
     position: absolute;
-    width: 11px;
-    height: 11px;
-    padding: 12px;
-    margin: -12px;
-    background-origin: content-box;
-    box-sizing: content-box;
+    width: 8px;
+    height: 8px;
     font-size: 0;
     color: transparent;
     z-index: 3;
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0 L6.1 3.9 L10 5 L6.1 6.1 L5 10 L3.9 6.1 L0 5 L3.9 3.9 Z' fill='%23ffedad'/%3E%3C/svg%3E") center / contain no-repeat;
-    filter: drop-shadow(0 0 3px rgba(255,235,160,.8));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0 L6.1 3.9 L10 5 L6.1 6.1 L5 10 L3.9 6.1 L0 5 L3.9 3.9 Z' fill='%23ffedad'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8px 8px;
+    background-origin: content-box;
+    box-sizing: content-box;
+    padding: 15px;
+    margin: -15px;
+    filter: drop-shadow(0 0 2px rgba(255,235,160,.9));
     animation: faintblink 5s ease-in-out infinite;
   }
   @keyframes faintblink {
@@ -2213,6 +2216,7 @@
       try {
         if (curVoiceEl) { curVoiceEl.pause(); curVoiceEl.currentTime = 0; }
         curVoiceEl = new Audio('voices/' + k + '.mp3');
+        curVoiceEl.volume = 1;
         const p = curVoiceEl.play();
         if (p && p.catch) p.catch(() => {});
       } catch (e) {}
@@ -2224,8 +2228,17 @@
       const s = actx.createBufferSource();
       s.buffer = buf;
       const g = actx.createGain();
-      g.gain.value = 2.2;
+      g.gain.value = 4.5;
       s.connect(g); g.connect(master);
+      // duck the piano so her voice sits on top
+      if (organGain || master) {
+        const dg = master.gain;
+        const t = actx.currentTime;
+        dg.cancelScheduledValues(t);
+        dg.setTargetAtTime(.055, t, .08);
+        const dur = buf.duration || 2;
+        dg.setTargetAtTime(muted ? 0 : .16, t + dur + .15, .25);
+      }
       s.start();
       curVoice = s;
     });
@@ -2264,11 +2277,11 @@
       if (en.isIntersecting && !episodeStarted) {
         episodeStarted = true;
         speak([
-          ['Frankie', '#9fe8c4', "She's here! Places, everyone!", 3080, 'frankie1'],
-          ['Draculaura', '#ff7bac', 'Mihrişah! Finally!', 2110, 'draculaura1'],
-          ['Lagoona', '#7fd8be', 'We made you a cake, love.', 2160, 'lagoona1'],
-          ['Cleo', '#f5c66a', 'I supervised... obviously.', 3260, 'cleo1'],
-          ['Clawdeen', '#c084fc', 'Alright, go on then. 21 candles. Blow them all out.', 4720, 'clawdeen1']
+          ['Frankie', '#9fe8c4', "She's here! Places, everyone!", 3130, 'frankie1'],
+          ['Draculaura', '#ff7bac', 'Mihrişah! Finally!', 2160, 'draculaura1'],
+          ['Lagoona', '#7fd8be', 'We made you a cake, love.', 2220, 'lagoona1'],
+          ['Cleo', '#f5c66a', 'I supervised... obviously.', 3470, 'cleo1'],
+          ['Clawdeen', '#c084fc', 'Alright, go on then. 21 candles. Blow them all out.', 5040, 'clawdeen1']
         ]);
         epObs.disconnect();
       }
@@ -2345,21 +2358,21 @@
       if (lit === 5) line = '5 left. Almost there.';
       if (lit === 1) line = 'One. Last. Candle.';
       countEl.textContent = line;
-      if (lit === 15) speakIfFree([['Draculaura', '#ff7bac', "15 left! You've got this!", 2370, 'draculaura2']]);
-      if (lit === 10) speakIfFree([['Frankie', '#9fe8c4', 'Halfway!! Keep going!', 2240, 'frankie2']]);
-      if (lit === 5) speakIfFree([['Clawdeen', '#c084fc', 'Almost there.', 1770, 'clawdeen2']]);
-      if (lit === 1) speakIfFree([['Cleo', '#f5c66a', 'The last one, darling. Make it count.', 3260, 'cleo2']]);
+      if (lit === 15) speakIfFree([['Draculaura', '#ff7bac', "15 left! You've got this!", 2660, 'draculaura2']]);
+      if (lit === 10) speakIfFree([['Frankie', '#9fe8c4', 'Halfway!! Keep going!', 2290, 'frankie2']]);
+      if (lit === 5) speakIfFree([['Clawdeen', '#c084fc', 'Almost there.', 1930, 'clawdeen2']]);
+      if (lit === 1) speakIfFree([['Cleo', '#f5c66a', 'The last one, darling. Make it count.', 3550, 'cleo2']]);
     } else {
       countEl.textContent = 'All 21 out.';
       wishMsg.innerHTML = 'Happy 21st birthday, Mihrişah.<br><span class="tried">laugh all you want, I tried my best</span>';
       wishMsg.classList.add('show');
       setTimeout(() => spellText('21'), 900);
       setTimeout(() => speak([
-        ['Lagoona', '#7fd8be', 'Happy birthday, Mihrişah!', 2240, 'lagoona2'],
-        ['Draculaura', '#ff7bac', 'Happy birthday, Mihrişah!!', 2240, 'draculaura3'],
-        ['Frankie', '#9fe8c4', 'Happy birthday!', 1690, 'frankie3'],
+        ['Lagoona', '#7fd8be', 'Happy birthday, Mihrişah!', 2290, 'lagoona2'],
+        ['Draculaura', '#ff7bac', 'Happy birthday, Mihrişah!!', 2350, 'draculaura3'],
+        ['Frankie', '#9fe8c4', 'Happy birthday!', 1820, 'frankie3'],
         ['Clawdeen', '#c084fc', 'Happy birthday, superstar.', 2420, 'clawdeen3'],
-        ['Cleo', '#f5c66a', 'Happy birthday, darling.', 2480, 'cleo3']
+        ['Cleo', '#f5c66a', 'Happy birthday, darling.', 2710, 'cleo3']
       ], true), 1500);
       confettiBurst(160);
       setTimeout(() => confettiBurst(120), 1200);
@@ -2393,7 +2406,7 @@
             : 'Click on it, hold, and drag across it.';
           countEl.innerHTML = 'By the way, you need to slice the cake if you want a piece of it. ' + how + "<br>Right to left, left to right, doesn't matter. Just slice it.";
           countEl.classList.add('attn');
-          speak([['Lagoona', '#7fd8be', 'Now cut the cake, love. The first slice is yours.', 3390, 'lagoona3']]);
+          speak([['Lagoona', '#7fd8be', 'Now cut the cake, love. The first slice is yours.', 3600, 'lagoona3']]);
         }
       }, 13000);
     }
@@ -2408,7 +2421,7 @@
       document.getElementById('cakesvg').classList.add('sliced');
       countEl.classList.remove('attn');
       countEl.textContent = 'there. the first slice is yours.';
-      speak([['Draculaura', '#ff7bac', 'Wait, save me a piece!!', 1740, 'draculaura4']], true);
+      speak([['Draculaura', '#ff7bac', 'Wait, save me a piece!!', 1880, 'draculaura4']], true);
       setTimeout(() => {
         const cr = document.getElementById('credits');
         if (cr && !cr.classList.contains('show')) cr.classList.add('show');
