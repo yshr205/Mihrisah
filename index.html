@@ -72,37 +72,42 @@
     position: fixed;
     inset: 0;
     z-index: 200;
+    height: 100vh;
+    height: 100dvh;              /* the actually-visible area, browser chrome included */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: max(6vh, 42px) 20px max(5vh, 34px);
+    gap: clamp(6px, 1.4vh, 16px);
+    padding: clamp(12px, 2.6vh, 38px) 16px clamp(10px, 2.2vh, 30px);
     background:
       radial-gradient(ellipse 90% 55% at 50% 8%, rgba(96,44,110,.42), transparent 62%),
       radial-gradient(ellipse 80% 45% at 50% 100%, rgba(120,20,52,.34), transparent 66%),
       #07050c;
-    -webkit-backdrop-filter: blur(2px);
     transition: opacity .62s cubic-bezier(.23,1,.32,1), transform .62s cubic-bezier(.23,1,.32,1);
   }
   #lock.open { opacity: 0; transform: scale(1.14); pointer-events: none; }
   #lock .lktop { text-align: center; }
   #lock .lkpad-lock {
-    width: 26px; height: 26px;
-    margin: 0 auto 14px;
+    width: clamp(17px, 2.4vh, 26px);
+    height: clamp(17px, 2.4vh, 26px);
+    margin: 0 auto clamp(4px, .9vh, 14px);
     opacity: .82;
   }
   #lock .lktime {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(3.6rem, 18vw, 5.4rem);
+    font-size: clamp(2rem, 6.4vh, 5rem);
     font-weight: 300;
     line-height: 1;
-    letter-spacing: .01em;
     color: #fff;
     text-shadow: 0 2px 30px rgba(0,0,0,.6);
   }
   #lock .lkdate {
-    margin-top: 6px;
-    font-size: clamp(.95rem, 4vw, 1.15rem);
+    margin-top: 3px;
+    font-size: clamp(.72rem, 1.8vh, 1.1rem);
     letter-spacing: .06em;
     color: rgba(255,255,255,.74);
   }
@@ -110,18 +115,18 @@
   /* notifications waiting on her lock screen */
   #lock .lknotes {
     width: min(360px, 92vw);
-    margin: 16px auto 0;
+    margin: clamp(7px, 1.5vh, 18px) auto 0;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: clamp(6px, 1.1vh, 10px);
   }
   #lock .lknote {
     display: flex;
     gap: 10px;
     align-items: flex-start;
     text-align: left;
-    padding: 13px 14px;
-    border-radius: 18px;
+    padding: clamp(9px, 1.5vh, 14px) clamp(11px, 3vw, 15px);
+    border-radius: clamp(14px, 2vh, 19px);
     background: rgba(255,255,255,.13);
     -webkit-backdrop-filter: blur(22px) saturate(140%);
     backdrop-filter: blur(22px) saturate(140%);
@@ -135,7 +140,7 @@
   @keyframes lknotein { to { opacity: 1; transform: none; } }
   #lock .lknicon {
     flex: 0 0 auto;
-    width: 30px; height: 30px;
+    width: clamp(23px, 3.3vh, 31px); height: clamp(23px, 3.3vh, 31px);
     border-radius: 8px;
     display: grid; place-items: center;
     box-shadow: 0 1px 4px rgba(0,0,0,.3);
@@ -148,24 +153,12 @@
     color: rgba(255,255,255,.62);
   }
   #lock .lkntitle {
-    font-size: .98rem; font-weight: 600; color: #fff; margin-top: 1px;
+    font-size: clamp(.82rem, 1.9vh, 1rem); font-weight: 600; color: #fff; margin-top: 1px;
     font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
   }
   #lock .lknbody {
-    font-size: .88rem; line-height: 1.38; color: rgba(255,255,255,.86); margin-top: 1px;
+    font-size: clamp(.75rem, 1.75vh, .9rem); line-height: 1.34; color: rgba(255,255,255,.86); margin-top: 1px;
     font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-  }
-  @media (max-height: 800px) {
-    #lock .lktime { font-size: clamp(2.4rem, 11vw, 3.2rem); }
-    #lock .lknotes { margin-top: 10px; }
-    #lock .lkprompt { margin-bottom: 14px; }
-  }
-  @media (max-height: 720px) {
-    #lock .lknotes { margin-top: 8px; gap: 7px; }
-    #lock .lknote { padding: 10px 12px; border-radius: 15px; }
-    #lock .lkntitle { font-size: .88rem; }
-    #lock .lknbody { font-size: .8rem; line-height: 1.3; }
-    #lock .lkpadlock, #lock .lkpad-lock { margin-bottom: 6px; }
   }
 
 
@@ -173,6 +166,35 @@
   #lock .lkbrowser { display: none; }
   #lock .lkbrowser.show { display: flex; }
   #lock .lkbrowser .lknbody b { color: #fff; font-weight: 700; }
+
+
+  /* only appears if the screen is genuinely too short to show the keypad */
+  #lkMore {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.16);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    color: #fff;
+    pointer-events: none;
+    z-index: 3;
+    animation: lkmore 1.7s ease-in-out infinite;
+  }
+  #lkMore.show { display: flex; }
+  @keyframes lkmore {
+    0%, 100% { transform: translate(-50%, 0); opacity: .9; }
+    50%      { transform: translate(-50%, 5px); opacity: 1; }
+  }
 
   #lock .lkmid { text-align: center; width: 100%; }
   #lock .lkprompt {
@@ -183,12 +205,12 @@
   }
   #lock .lkdots {
     display: flex;
-    gap: 20px;
+    gap: clamp(13px, 2.4vh, 20px);
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   #lock .lkdots i {
-    width: 13px; height: 13px;
+    width: clamp(9px, 1.5vh, 13px); height: clamp(9px, 1.5vh, 13px);
     border-radius: 50%;
     border: 1.5px solid rgba(255,255,255,.72);
     background: transparent;
@@ -203,9 +225,9 @@
     40%, 60% { transform: translateX(11px); }
   }
   #lock .lkhint {
-    min-height: 1.3em;
-    margin: 12px 0 0;
-    font-size: .88rem;
+    min-height: 1.2em;
+    margin: clamp(6px, 1.2vh, 13px) 0 0;
+    font-size: clamp(.7rem, 1.6vh, .9rem);
     letter-spacing: .03em;
     color: rgba(255,190,215,.85);
     opacity: 0;
@@ -215,8 +237,10 @@
   #lock .lkpad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px 26px;
-    width: min(300px, 78vw);
+    gap: clamp(7px, 1.3vh, 17px) clamp(15px, 5.5vw, 26px);
+    /* the third value caps it by HEIGHT: four rows can never overflow the screen */
+    width: min(300px, 76vw, 33vh);
+    flex: 0 0 auto;
   }
   #lock .key {
     position: relative;
@@ -238,12 +262,12 @@
     transition: background .14s ease, transform .14s cubic-bezier(.23,1,.32,1);
   }
   #lock .key:active { background: rgba(255,255,255,.3); transform: scale(.94); }
-  #lock .key b { font-size: clamp(1.6rem, 7vw, 2rem); font-weight: 400; }
+  #lock .key b { font-size: clamp(1.1rem, 3.4vh, 1.9rem); font-weight: 400; }
   #lock .key s {
     text-decoration: none;
-    font-size: .56rem;
+    font-size: clamp(.4rem, .95vh, .56rem);
     letter-spacing: .16em;
-    margin-top: 3px;
+    margin-top: 2px;
     opacity: .66;
   }
   #lock .key.blank { background: none; pointer-events: none; }
@@ -254,11 +278,6 @@
     color: rgba(255,255,255,.85);
   }
   #lock .key.del:active { background: rgba(255,255,255,.08); }
-  @media (max-height: 700px) {
-    #lock { padding-top: 3vh; padding-bottom: 2vh; }
-    #lock .lktime { font-size: clamp(2.8rem, 13vw, 3.6rem); }
-    #lock .lkpad { gap: 12px 22px; width: min(258px, 74vw); }
-  }
 
   #intro {
     position: fixed;
@@ -1694,6 +1713,7 @@
     <div class="lkdots" id="lkDots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <p class="lkhint" id="lkHint"></p>
   </div>
+  <div id="lkMore" aria-hidden="true"><span>swipe up for the keypad</span><span>&#8595;</span></div>
   <div class="lkpad" id="lkPad">
       <button class="key" data-k="1" type="button" aria-label="1"><b>1</b><s></s></button>
       <button class="key" data-k="2" type="button" aria-label="2"><b>2</b><s>ABC</s></button>
@@ -1802,6 +1822,20 @@
       if (e.key >= '0' && e.key <= '9') press(e.key);
       else if (e.key === 'Backspace') press('del');
     });
+
+    // if the screen is too short to show everything, say so and let her scroll
+    var more = document.getElementById('lkMore');
+    function measure() {
+      if (!more || done) return;
+      var over = lock.scrollHeight - lock.clientHeight > 12;
+      more.classList.toggle('show', over && lock.scrollTop < 8);
+    }
+    lock.addEventListener('scroll', measure, { passive: true });
+    addEventListener('resize', measure);
+    addEventListener('orientationchange', function () { setTimeout(measure, 260); });
+    setTimeout(measure, 700);
+    setTimeout(measure, 1800);
+
     // last resort: if she has been staring at it for two minutes, let her in
     setTimeout(function () { if (!done) say('day, month, year. 01 · 08 · 05'); }, 120000);
   })();
