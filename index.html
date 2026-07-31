@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="locked">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,6 +38,7 @@
     touch-action: pan-y pinch-zoom;
     overscroll-behavior-x: none;
     overflow-x: hidden;
+    overflow-wrap: break-word;
   }
 
   body {
@@ -61,6 +62,135 @@
     transition: opacity 1.1s ease;
   }
   #tocurtain.go { opacity: 1; visibility: visible; }
+
+  /* ============ her lock screen ============
+     The passcode is her own birthday. She already knows it. */
+  html.locked, html.locked body { overflow: hidden; height: 100%; }
+  html.locked #intro { animation-play-state: paused; }
+  #lock {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(6vh, 42px) 20px max(5vh, 34px);
+    background:
+      radial-gradient(ellipse 90% 55% at 50% 8%, rgba(96,44,110,.42), transparent 62%),
+      radial-gradient(ellipse 80% 45% at 50% 100%, rgba(120,20,52,.34), transparent 66%),
+      #07050c;
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity .62s cubic-bezier(.23,1,.32,1), transform .62s cubic-bezier(.23,1,.32,1);
+  }
+  #lock.open { opacity: 0; transform: scale(1.14); pointer-events: none; }
+  #lock .lktop { text-align: center; }
+  #lock .lkpad-lock {
+    width: 26px; height: 26px;
+    margin: 0 auto 14px;
+    opacity: .82;
+  }
+  #lock .lktime {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(3.6rem, 18vw, 5.4rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: .01em;
+    color: #fff;
+    text-shadow: 0 2px 30px rgba(0,0,0,.6);
+  }
+  #lock .lkdate {
+    margin-top: 6px;
+    font-size: clamp(.95rem, 4vw, 1.15rem);
+    letter-spacing: .06em;
+    color: rgba(255,255,255,.74);
+  }
+  #lock .lkmid { text-align: center; width: 100%; }
+  #lock .lkprompt {
+    font-size: clamp(1rem, 4.2vw, 1.15rem);
+    letter-spacing: .04em;
+    color: rgba(255,255,255,.9);
+    margin: 0 0 20px;
+  }
+  #lock .lkdots {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  #lock .lkdots i {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.72);
+    background: transparent;
+    transition: background .18s ease, transform .18s cubic-bezier(.23,1,.32,1);
+  }
+  #lock .lkdots i.on { background: #fff; transform: scale(1.06); }
+  #lock .lkdots.bad { animation: lkshake .42s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes lkshake {
+    10%, 90% { transform: translateX(-7px); }
+    20%, 80% { transform: translateX(9px); }
+    30%, 50%, 70% { transform: translateX(-11px); }
+    40%, 60% { transform: translateX(11px); }
+  }
+  #lock .lkhint {
+    min-height: 1.3em;
+    margin: 12px 0 0;
+    font-size: .88rem;
+    letter-spacing: .03em;
+    color: rgba(255,190,215,.85);
+    opacity: 0;
+    transition: opacity .5s ease;
+  }
+  #lock .lkhint.show { opacity: 1; }
+  #lock .lkpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 26px;
+    width: min(300px, 78vw);
+  }
+  #lock .key {
+    position: relative;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,.11);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .14s ease, transform .14s cubic-bezier(.23,1,.32,1);
+  }
+  #lock .key:active { background: rgba(255,255,255,.3); transform: scale(.94); }
+  #lock .key b { font-size: clamp(1.6rem, 7vw, 2rem); font-weight: 400; }
+  #lock .key s {
+    text-decoration: none;
+    font-size: .56rem;
+    letter-spacing: .16em;
+    margin-top: 3px;
+    opacity: .66;
+  }
+  #lock .key.blank { background: none; pointer-events: none; }
+  #lock .key.del {
+    background: none;
+    font-size: .95rem;
+    letter-spacing: .04em;
+    color: rgba(255,255,255,.85);
+  }
+  #lock .key.del:active { background: rgba(255,255,255,.08); }
+  @media (max-height: 700px) {
+    #lock { padding-top: 3vh; padding-bottom: 2vh; }
+    #lock .lktime { font-size: clamp(2.8rem, 13vw, 3.6rem); }
+    #lock .lkpad { gap: 12px 22px; width: min(258px, 74vw); }
+  }
+
   #intro {
     position: fixed;
     inset: 0;
@@ -218,7 +348,8 @@
   section {
     content-visibility: auto;
     contain-intrinsic-size: auto 900px;
-    min-height: 100vh;
+    min-height: 100vh;   /* fallback for old browsers */
+    min-height: 100svh;  /* iPhone: 100vh includes the area behind the address bar */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -239,10 +370,6 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: shimmer 6s linear infinite, heroin 1.8s ease .3s both;
-  }
-  @keyframes heroin {
-    from { opacity: 0; transform: scale(1.07) translateY(14px); }
-    to { opacity: 1; transform: none; }
   }
   @keyframes shimmer { to { background-position: 200% center; } }
 
@@ -277,10 +404,6 @@
     from { opacity: 0; transform: translateY(40px) scale(.9); }
     to   { opacity: 1; transform: none; }
   }
-  @keyframes breathe21 {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.035); }
-  }
 
   .scroll-hint {
     margin-top: 60px;
@@ -295,6 +418,198 @@
     to { opacity: 1; transform: none; }
   }
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
+  /* ---- the bouquet ---- */
+  .bqsec {
+    padding-top: 4vh;
+    padding-bottom: 4vh;
+  }
+  #bouquet {
+    width: min(86vw, 430px);
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    -webkit-mask-image: radial-gradient(ellipse 74% 72% at 50% 46%, #000 62%, transparent 92%);
+    mask-image: radial-gradient(ellipse 74% 72% at 50% 46%, #000 62%, transparent 92%);
+    animation: bqwind 8s ease-in-out infinite alternate;
+    transform-origin: 50% 92%;
+  }
+  .bqsec { position: relative; }
+  .bqstage {
+    position: relative;
+    width: min(92vw, 470px);
+    margin: 0 auto;
+  }
+  /* a shaft of moonlight falling on the flowers */
+  .bqbeam {
+    position: absolute;
+    left: 50%;
+    top: -14%;
+    width: 62%;
+    height: 92%;
+    transform: translateX(-50%) rotate(-6deg);
+    background: linear-gradient(180deg, rgba(255,214,232,.10) 0%, rgba(255,180,210,.045) 45%, transparent 78%);
+    filter: blur(12px);
+    pointer-events: none;
+    animation: bqbeam 9s ease-in-out infinite alternate;
+  }
+  @keyframes bqbeam { from { opacity: .55; } to { opacity: 1; } }
+  /* the ground it stands on */
+  .bqfloor {
+    position: absolute;
+    left: 50%;
+    bottom: 1%;
+    width: 74%;
+    height: 46px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at 50% 40%, rgba(150,25,55,.3), rgba(60,10,30,.16) 45%, transparent 72%);
+    filter: blur(9px);
+    pointer-events: none;
+  }
+  /* petals resting on the ground */
+  .gpetal {
+    position: absolute;
+    bottom: 2%;
+    border-radius: 60% 60% 55% 55% / 78% 78% 30% 30%;
+    box-shadow: 0 2px 5px rgba(0,0,0,.55);
+    pointer-events: none;
+  }
+  /* petals drifting down through the frame */
+  .fpetal {
+    position: absolute;
+    top: -8%;
+    border-radius: 60% 60% 55% 55% / 78% 78% 30% 30%;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,.4);
+    animation-name: bqfall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes bqfall {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: .85; }
+    50%  { transform: translate(26px, 52vh) rotate(220deg); opacity: .8; }
+    85%  { opacity: .5; }
+    100% { transform: translate(-18px, 104vh) rotate(430deg); opacity: 0; }
+  }
+
+  /* three depth layers so the fall has real space in it */
+  .fpetal.far  { filter: blur(2.4px); opacity: 0; z-index: 0; }
+  .fpetal.mid  { filter: blur(.7px);  z-index: 1; }
+  .fpetal.near { filter: none;        z-index: 4; }
+  @keyframes bqfallA {
+    0%   { transform: translate(0,0) rotate(0deg) rotateX(0deg); opacity: 0; }
+    9%   { opacity: .9; }
+    34%  { transform: translate(30px, 34vh) rotate(150deg) rotateX(140deg); }
+    62%  { transform: translate(-14px, 64vh) rotate(300deg) rotateX(300deg); opacity: .8; }
+    88%  { opacity: .42; }
+    100% { transform: translate(22px, 106vh) rotate(470deg) rotateX(520deg); opacity: 0; }
+  }
+  @keyframes bqfallB {
+    0%   { transform: translate(0,0) rotate(0deg) rotateY(0deg); opacity: 0; }
+    11%  { opacity: .85; }
+    40%  { transform: translate(-34px, 40vh) rotate(-170deg) rotateY(160deg); }
+    70%  { transform: translate(18px, 72vh) rotate(-320deg) rotateY(330deg); opacity: .72; }
+    90%  { opacity: .35; }
+    100% { transform: translate(-26px, 108vh) rotate(-500deg) rotateY(540deg); opacity: 0; }
+  }
+  /* a bloom of colour behind the flowers, so they sit in light rather than on black */
+  .bqbloom {
+    position: absolute;
+    left: 50%; top: 44%;
+    width: 96%; aspect-ratio: 1.15;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 46%,
+      rgba(190,40,80,.20) 0%, rgba(120,30,90,.13) 34%, rgba(60,15,60,.06) 56%, transparent 76%);
+    filter: blur(18px);
+    pointer-events: none;
+    z-index: 0;
+    animation: bqbloom 11s ease-in-out infinite alternate;
+  }
+  @keyframes bqbloom {
+    from { opacity: .62; transform: translate(-50%,-50%) scale(.94); }
+    to   { opacity: 1;   transform: translate(-50%,-50%) scale(1.07); }
+  }
+  /* a second, colder shaft crossing the first */
+  .bqbeam2 {
+    position: absolute;
+    left: 44%; top: -18%;
+    width: 40%; height: 86%;
+    transform: translateX(-50%) rotate(9deg);
+    background: linear-gradient(180deg, rgba(196,168,255,.09) 0%, rgba(150,120,220,.035) 50%, transparent 80%);
+    filter: blur(15px);
+    pointer-events: none;
+    z-index: 0;
+    animation: bqbeam 13s ease-in-out infinite alternate-reverse;
+  }
+  #bouquet { position: relative; z-index: 2; cursor: pointer; }
+  /* petals she knocks loose by touching the flowers */
+  .bqburst {
+    position: absolute;
+    border-radius: 60% 60% 55% 55% / 78% 78% 30% 30%;
+    pointer-events: none;
+    z-index: 5;
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,.4);
+  }
+
+  /* dust catching the light */
+  .bqmote {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,226,190,.85);
+    box-shadow: 0 0 6px rgba(255,210,170,.8);
+    pointer-events: none;
+    animation-name: bqmote;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  @keyframes bqmote {
+    from { transform: translate(0,0); opacity: .25; }
+    to   { transform: translate(9px,-14px); opacity: .95; }
+  }
+  .bqrule {
+    position: relative;
+    width: 150px;
+    height: 1px;
+    margin: 20px auto 0;
+    background: linear-gradient(90deg, transparent, rgba(245,198,106,.55), transparent);
+  }
+  .bqrule::after {
+    content: '❦';
+    position: absolute;
+    top: -.78em; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(245,198,106,.65);
+    background: var(--ink);
+    padding: 0 9px;
+    font-size: .95rem;
+  }
+  html.lowfx .fpetal, html.lowfx .bqmote, html.lowfx .bqbeam { display: none; }
+  .bqsec::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 42%;
+    width: min(96vw, 520px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(190,30,60,.13), rgba(120,20,60,.05) 45%, transparent 70%);
+    pointer-events: none;
+  }
+  .bqcap {
+    margin-top: 18px;
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(1.3rem, 5vw, 1.9rem);
+    color: var(--rose);
+    opacity: .9;
+  }
+  @keyframes bqwind {
+    0%   { transform: rotate(-1.4deg) translateX(-3px); }
+    100% { transform: rotate(1.4deg) translateX(3px); }
+  }
+  html.lowfx #bouquet { animation: none; }
 
   /* ---- Message ---- */
   .message { max-width: 620px; margin: 0 auto; }
@@ -823,9 +1138,11 @@
     justify-content: center;
     transition: transform .35s ease, box-shadow .35s ease;
   }
-  .photo:hover {
-    transform: translateY(-6px) rotate(-.5deg);
-    box-shadow: 0 18px 40px rgba(0,0,0,.5);
+  @media (hover: hover) and (pointer: fine) {
+    .photo:hover {
+      transform: translateY(-6px) rotate(-.5deg);
+      box-shadow: 0 18px 40px rgba(0,0,0,.5);
+    }
   }
   .photo img {
     width: 100%;
@@ -888,7 +1205,9 @@
     box-shadow: 0 18px 44px rgba(0,0,0,.55);
   }
   .pair .pimg img, .prow img { transition: transform .5s ease; }
-  .pair .pimg img:hover, .prow img:hover { transform: scale(1.02); }
+  @media (hover: hover) and (pointer: fine) {
+    .pair .pimg img:hover, .prow img:hover { transform: scale(1.02); }
+  }
   #credits {
     display: none;
     width: min(520px, 92vw);
@@ -1226,10 +1545,6 @@
     transition: transform .15s ease;
   }
   .skylink:active { transform: scale(.94); }
-  @keyframes skybob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-  }
 
   footer {
     position: relative;
@@ -1263,6 +1578,35 @@
 </head>
 <body>
 
+<div id="lock" role="dialog" aria-label="Enter passcode">
+  <div class="lktop">
+    <svg class="lkpad-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="4.5" y="10.5" width="15" height="11" rx="3" fill="#fff" opacity=".92"/>
+      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".92"/>
+    </svg>
+    <div class="lktime" id="lkTime">00:00</div>
+    <div class="lkdate" id="lkDate"></div>
+  </div>
+  <div class="lkmid">
+    <p class="lkprompt">Enter Passcode</p>
+    <div class="lkdots" id="lkDots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="lkhint" id="lkHint"></p>
+  </div>
+  <div class="lkpad" id="lkPad">
+      <button class="key" data-k="1" type="button" aria-label="1"><b>1</b><s></s></button>
+      <button class="key" data-k="2" type="button" aria-label="2"><b>2</b><s>ABC</s></button>
+      <button class="key" data-k="3" type="button" aria-label="3"><b>3</b><s>DEF</s></button>
+      <button class="key" data-k="4" type="button" aria-label="4"><b>4</b><s>GHI</s></button>
+      <button class="key" data-k="5" type="button" aria-label="5"><b>5</b><s>JKL</s></button>
+      <button class="key" data-k="6" type="button" aria-label="6"><b>6</b><s>MNO</s></button>
+      <button class="key" data-k="7" type="button" aria-label="7"><b>7</b><s>PQRS</s></button>
+      <button class="key" data-k="8" type="button" aria-label="8"><b>8</b><s>TUV</s></button>
+      <button class="key" data-k="9" type="button" aria-label="9"><b>9</b><s>WXYZ</s></button>
+      <span class="key blank"></span>
+      <button class="key" data-k="0" type="button" aria-label="0"><b>0</b><s></s></button>
+      <button class="key del" data-k="del" type="button" aria-label="Delete">delete</button>
+  </div>
+</div>
 <div id="intro"><span>For Mihrişah</span></div>
 <div id="tocurtain"></div>
 <button id="musicBtn" aria-label="toggle music">♪</button>
@@ -1281,6 +1625,21 @@
     <p class="date">August 1 · 2026</p>
     <div class="num21">21</div>
     <p class="scroll-hint">scroll ↓</p>
+  </section>
+
+  <section class="bqsec">
+    <div class="bqstage">
+      <div class="bqbloom"></div>
+      <div class="bqbeam"></div>
+      <div class="bqbeam2"></div>
+      <span class="bqmote" style="left:47.2%;top:64.4%;width:2.0px;height:2.0px;animation-duration:4.3s;animation-delay:-7.8s"></span><span class="bqmote" style="left:72.5%;top:75.6%;width:2.7px;height:2.7px;animation-duration:4.1s;animation-delay:-6.3s"></span><span class="bqmote" style="left:56.4%;top:8.7%;width:3.9px;height:3.9px;animation-duration:4.2s;animation-delay:-1.4s"></span><span class="bqmote" style="left:20.5%;top:68.5%;width:2.7px;height:2.7px;animation-duration:8.6s;animation-delay:-7.5s"></span><span class="bqmote" style="left:35.4%;top:50.0%;width:3.5px;height:3.5px;animation-duration:7.9s;animation-delay:-0.9s"></span><span class="bqmote" style="left:76.9%;top:76.8%;width:2.2px;height:2.2px;animation-duration:4.2s;animation-delay:-7.6s"></span><span class="bqmote" style="left:34.0%;top:56.9%;width:3.8px;height:3.8px;animation-duration:8.6s;animation-delay:-2.7s"></span><span class="bqmote" style="left:53.2%;top:33.0%;width:2.2px;height:2.2px;animation-duration:5.6s;animation-delay:-1.4s"></span><span class="bqmote" style="left:16.0%;top:63.1%;width:2.1px;height:2.1px;animation-duration:9.0s;animation-delay:-1.3s"></span><span class="bqmote" style="left:94.7%;top:50.7%;width:3.2px;height:3.2px;animation-duration:6.0s;animation-delay:-1.9s"></span><span class="bqmote" style="left:79.7%;top:44.5%;width:3.8px;height:3.8px;animation-duration:6.1s;animation-delay:-0.4s"></span><span class="bqmote" style="left:5.1%;top:47.5%;width:3.5px;height:3.5px;animation-duration:8.2s;animation-delay:-1.0s"></span><span class="bqmote" style="left:91.3%;top:58.4%;width:2.9px;height:2.9px;animation-duration:7.9s;animation-delay:-0.9s"></span><span class="bqmote" style="left:16.0%;top:75.6%;width:4.0px;height:4.0px;animation-duration:5.5s;animation-delay:-3.6s"></span>
+      <img id="bouquet" src="photos/bouquet.jpg" alt="" loading="lazy" decoding="async">
+      <div class="bqfloor"></div>
+      <span class="gpetal" style="left:82.9%;transform:rotate(-30deg);width:16px;height:11px;background:#7a1050;opacity:0.73"></span><span class="gpetal" style="left:41.5%;transform:rotate(79deg);width:15px;height:10px;background:#4c2a5e;opacity:0.55"></span><span class="gpetal" style="left:66.9%;transform:rotate(-35deg);width:12px;height:8px;background:#d1567f;opacity:0.42"></span><span class="gpetal" style="left:18.8%;transform:rotate(-79deg);width:17px;height:12px;background:#d1567f;opacity:0.48"></span><span class="gpetal" style="left:45.6%;transform:rotate(63deg);width:18px;height:13px;background:#5b2a6e;opacity:0.61"></span><span class="gpetal" style="left:88.3%;transform:rotate(-1deg);width:14px;height:10px;background:#3a2140;opacity:0.78"></span><span class="gpetal" style="left:18.8%;transform:rotate(-7deg);width:13px;height:9px;background:#6b0e20;opacity:0.47"></span><span class="gpetal" style="left:49.2%;transform:rotate(-16deg);width:17px;height:12px;background:#d1567f;opacity:0.70"></span><span class="gpetal" style="left:81.8%;transform:rotate(-57deg);width:16px;height:11px;background:#4c2a5e;opacity:0.70"></span><span class="gpetal" style="left:80.1%;transform:rotate(2deg);width:15px;height:10px;background:#241428;opacity:0.71"></span><span class="gpetal" style="left:59.5%;transform:rotate(10deg);width:18px;height:13px;background:#a3163a;opacity:0.63"></span><span class="gpetal" style="left:70.4%;transform:rotate(25deg);width:19px;height:13px;background:#5b2a6e;opacity:0.69"></span><span class="gpetal" style="left:86.9%;transform:rotate(-49deg);width:18px;height:13px;background:#5b2a6e;opacity:0.53"></span><span class="gpetal" style="left:9.4%;transform:rotate(25deg);width:16px;height:11px;background:#241428;opacity:0.70"></span><span class="gpetal" style="left:63.5%;transform:rotate(-63deg);width:19px;height:13px;background:#d1567f;opacity:0.42"></span>
+      <span class="fpetal far" style="left:84.0%;animation-name:bqfallB;animation-duration:22.7s;animation-delay:-6.8s;width:7px;height:5px;background:#8d1230"></span><span class="fpetal mid" style="left:68.4%;animation-name:bqfallB;animation-duration:12.5s;animation-delay:-3.4s;width:11px;height:7px;background:#e0698f"></span><span class="fpetal near" style="left:32.7%;animation-name:bqfallB;animation-duration:12.7s;animation-delay:-15.8s;width:21px;height:13px;background:#d1567f"></span><span class="fpetal mid" style="left:69.5%;animation-name:bqfallB;animation-duration:11.3s;animation-delay:-14.5s;width:14px;height:9px;background:#3a2140"></span><span class="fpetal near" style="left:21.5%;animation-name:bqfallB;animation-duration:12.7s;animation-delay:-0.4s;width:21px;height:16px;background:#8d1230"></span><span class="fpetal far" style="left:84.4%;animation-name:bqfallA;animation-duration:25.5s;animation-delay:-3.4s;width:9px;height:7px;background:#3a2140"></span><span class="fpetal near" style="left:60.9%;animation-name:bqfallB;animation-duration:17.3s;animation-delay:-14.0s;width:14px;height:10px;background:#6b0e20"></span><span class="fpetal mid" style="left:5.5%;animation-name:bqfallB;animation-duration:17.8s;animation-delay:-3.4s;width:13px;height:9px;background:#e0698f"></span><span class="fpetal near" style="left:88.3%;animation-name:bqfallA;animation-duration:18.1s;animation-delay:-2.5s;width:18px;height:11px;background:#7a1050"></span><span class="fpetal mid" style="left:74.1%;animation-name:bqfallB;animation-duration:12.1s;animation-delay:-13.3s;width:10px;height:7px;background:#5b2a6e"></span><span class="fpetal far" style="left:28.4%;animation-name:bqfallB;animation-duration:15.6s;animation-delay:-9.0s;width:10px;height:7px;background:#a3163a"></span><span class="fpetal mid" style="left:18.9%;animation-name:bqfallA;animation-duration:14.2s;animation-delay:-0.5s;width:12px;height:8px;background:#3a2140"></span><span class="fpetal near" style="left:86.0%;animation-name:bqfallB;animation-duration:11.9s;animation-delay:-1.3s;width:13px;height:10px;background:#6b0e20"></span><span class="fpetal mid" style="left:6.1%;animation-name:bqfallA;animation-duration:17.6s;animation-delay:-14.8s;width:10px;height:7px;background:#5b2a6e"></span><span class="fpetal near" style="left:37.6%;animation-name:bqfallB;animation-duration:18.1s;animation-delay:-14.5s;width:16px;height:12px;background:#1a1020"></span><span class="fpetal far" style="left:60.4%;animation-name:bqfallA;animation-duration:25.4s;animation-delay:-16.9s;width:8px;height:6px;background:#c21f4a"></span><span class="fpetal near" style="left:13.3%;animation-name:bqfallB;animation-duration:18.7s;animation-delay:-1.7s;width:18px;height:13px;background:#241428"></span><span class="fpetal mid" style="left:20.6%;animation-name:bqfallA;animation-duration:14.3s;animation-delay:-9.7s;width:15px;height:11px;background:#d1567f"></span><span class="fpetal near" style="left:57.8%;animation-name:bqfallA;animation-duration:17.5s;animation-delay:-8.1s;width:18px;height:12px;background:#1a1020"></span><span class="fpetal mid" style="left:38.0%;animation-name:bqfallA;animation-duration:18.9s;animation-delay:-10.1s;width:16px;height:10px;background:#241428"></span><span class="fpetal far" style="left:64.1%;animation-name:bqfallB;animation-duration:14.9s;animation-delay:-13.3s;width:9px;height:6px;background:#a3163a"></span><span class="fpetal mid" style="left:38.1%;animation-name:bqfallA;animation-duration:14.6s;animation-delay:-10.5s;width:13px;height:10px;background:#1a1020"></span>
+    </div>
+    <p class="bqcap">for you.</p>
+    <div class="bqrule"></div>
   </section>
 
   <section class="message">
@@ -2013,7 +2372,16 @@
         // voices ride their own bus so ducking the piano never touches them
         voiceBus = actx.createGain();
         voiceBus.gain.value = muted ? 0 : 1;
-        voiceBus.connect(actx.destination);
+        // the clips are boosted hard so they're audible on a phone speaker;
+        // this catches the peaks so the loud syllables don't clip and crackle
+        voiceLim = actx.createDynamicsCompressor();
+        voiceLim.threshold.value = -8;
+        voiceLim.knee.value = 6;
+        voiceLim.ratio.value = 12;
+        voiceLim.attack.value = .003;
+        voiceLim.release.value = .18;
+        voiceBus.connect(voiceLim);
+        voiceLim.connect(actx.destination);
         loopStart = actx.currentTime + .3;
         evIdx = 0;
         scheduler();
@@ -2274,7 +2642,7 @@
   // cinematic reveals: elements tilt up in 3D as they enter the screen
   document.documentElement.classList.add('js');
   const revEls = [];
-  document.querySelectorAll('#letterBody > *, .wishsec .caption, .mhscene, #candleCount, .wishes p, .closing p, footer').forEach(el => {
+  document.querySelectorAll('#letterBody > *, .wishsec .caption, .mhscene, #candleCount, .wishes p, .closing p, footer, #bouquet, .bqcap').forEach(el => {
     el.setAttribute('data-rev', '');
     revEls.push(el);
   });
@@ -2285,6 +2653,16 @@
     }
   }), { threshold: .12 });
   revEls.forEach(el => obsR.observe(el));
+  // Safety net. The reveal starts every one of these at opacity 0. If anything ever
+  // goes wrong above, the letter would sit invisible forever — the worst possible
+  // failure. After 4s, show anything still hidden no matter what.
+  setTimeout(() => {
+    revEls.forEach(el => {
+      if (!el.classList.contains('in') && el.getBoundingClientRect().top < innerHeight * 1.5) {
+        el.classList.add('in');
+      }
+    });
+  }, 4000);
 
   // cinematic fade into the sky page
   const skyLink = document.getElementById('skyLink');
@@ -2418,7 +2796,7 @@
       if (cb) cb(buf);
     }, () => {});
   }
-  let curVoice = null, curVoiceEl = null, voiceBus = null;
+  let curVoice = null, curVoiceEl = null, voiceBus = null, voiceLim = null;
   const FILE_MODE = location.protocol === 'file:';
   function playVoice(k) {
     if (!k || muted) return;
@@ -2691,6 +3069,144 @@
   });
 
 })();
+
+  /* ================= her lock screen =================
+     Passcode 010805 — the day she was born. She knows it already.
+     Two safeguards: a hint after 2 wrong tries, the answer after 4.
+     She can never be locked out of her own birthday present.        */
+  (function () {
+    var lock = document.getElementById('lock');
+    if (!lock) { document.documentElement.classList.remove('locked'); return; }
+    var CODE = '010805';
+    var dots = document.getElementById('lkDots');
+    var hint = document.getElementById('lkHint');
+    var pad  = document.getElementById('lkPad');
+    var pips = dots ? dots.querySelectorAll('i') : [];
+    var buf = '', wrong = 0, done = false;
+
+    function clock() {
+      var d = new Date();
+      var h = d.getHours(), m = d.getMinutes();
+      var t = document.getElementById('lkTime');
+      var dt = document.getElementById('lkDate');
+      if (t) t.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+      if (dt) dt.textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+    clock(); setInterval(clock, 10000);
+
+    function tick(freq, vol) {
+      try {
+        if (!actx || actx.state !== 'running') return;
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0, actx.currentTime);
+        g.gain.linearRampToValueAtTime(vol, actx.currentTime + .005);
+        g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + .13);
+        o.connect(g); g.connect(actx.destination);
+        o.start(); o.stop(actx.currentTime + .15);
+      } catch (e) {}
+    }
+
+    function paint() {
+      for (var i = 0; i < pips.length; i++) pips[i].classList.toggle('on', i < buf.length);
+    }
+
+    function say(msg) { if (hint) { hint.textContent = msg; hint.classList.add('show'); } }
+
+    function open_() {
+      done = true;
+      tick(880, .05);
+      setTimeout(function () { tick(1320, .045); }, 90);
+      lock.classList.add('open');
+      document.documentElement.classList.remove('locked');
+      setTimeout(function () { if (lock && lock.parentNode) lock.parentNode.removeChild(lock); }, 900);
+    }
+
+    function check() {
+      if (buf === CODE) { paint(); setTimeout(open_, 190); return; }
+      wrong++;
+      if (dots) {
+        dots.classList.remove('bad');
+        void dots.offsetWidth;
+        dots.classList.add('bad');
+      }
+      tick(150, .05);
+      if (wrong === 1) say('not quite. try again.');
+      else if (wrong === 2) say('hint: it is a date. six digits.');
+      else if (wrong === 3) say('hint: the day you were born.');
+      else say('day, month, year. 01 · 08 · 05');
+      setTimeout(function () { buf = ''; paint(); }, 430);
+    }
+
+    function press(k) {
+      if (done) return;
+      if (k === 'del') { buf = buf.slice(0, -1); paint(); tick(320, .03); return; }
+      if (buf.length >= 6) return;
+      buf += k;
+      paint();
+      tick(520 + buf.length * 40, .035);
+      if (buf.length === 6) setTimeout(check, 180);
+    }
+
+    if (pad) {
+      pad.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-k]') : null;
+        if (b) { e.preventDefault(); press(b.getAttribute('data-k')); }
+      });
+    }
+    // a real keyboard works too, for anyone on a laptop
+    addEventListener('keydown', function (e) {
+      if (done) return;
+      if (e.key >= '0' && e.key <= '9') press(e.key);
+      else if (e.key === 'Backspace') press('del');
+    });
+    // last resort: if she has been staring at it for two minutes, let her in
+    setTimeout(function () { if (!done) say('day, month, year. 01 · 08 · 05'); }, 120000);
+  })();
+
+
+  // touch the flowers and petals come loose
+  (function () {
+    var bq = document.getElementById('bouquet');
+    var stage = bq && bq.closest ? bq.closest('.bqstage') : null;
+    if (!bq || !stage) return;
+    var COLS = ['#a3163a','#8d1230','#c21f4a','#6b0e20','#7a1050','#3a2140','#4c2a5e','#e0698f','#241428'];
+    var cooling = false;
+    function shed(e) {
+      if (cooling) return;
+      cooling = true;
+      setTimeout(function () { cooling = false; }, 420);
+      var r = stage.getBoundingClientRect();
+      var pt = e.touches ? e.touches[0] : e;
+      var ox = pt && pt.clientX ? ((pt.clientX - r.left) / r.width) * 100 : 50;
+      var oy = pt && pt.clientY ? ((pt.clientY - r.top) / r.height) * 100 : 42;
+      for (var i = 0; i < 9; i++) {
+        (function (i) {
+          var p = document.createElement('span');
+          p.className = 'bqburst';
+          var w = 9 + Math.random() * 9;
+          p.style.cssText =
+            'left:' + (ox + (Math.random() - .5) * 16) + '%;' +
+            'top:' + (oy + (Math.random() - .5) * 14) + '%;' +
+            'width:' + w + 'px;height:' + (w * .7) + 'px;' +
+            'background:' + COLS[(Math.random() * COLS.length) | 0] + ';' +
+            'opacity:.95;transition:transform 2.4s cubic-bezier(.2,.6,.35,1),opacity 2.4s ease;';
+          stage.appendChild(p);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              p.style.transform = 'translate(' + ((Math.random() - .5) * 150) + 'px,' +
+                (110 + Math.random() * 150) + 'px) rotate(' + ((Math.random() - .5) * 700) + 'deg)';
+              p.style.opacity = '0';
+            });
+          });
+          setTimeout(function () { if (p.parentNode) p.parentNode.removeChild(p); }, 2700);
+        })(i);
+      }
+    }
+    bq.addEventListener('click', shed);
+    bq.addEventListener('touchstart', shed, { passive: true });
+  })();
+
 </script>
 
 </body>
