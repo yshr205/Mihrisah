@@ -105,6 +105,66 @@
     letter-spacing: .06em;
     color: rgba(255,255,255,.74);
   }
+
+  /* notifications waiting on her lock screen */
+  #lock .lknotes {
+    width: min(340px, 88vw);
+    margin: 16px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #lock .lknote {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.13);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    box-shadow: 0 6px 22px rgba(0,0,0,.28);
+    opacity: 0;
+    transform: translateY(14px) scale(.97);
+    animation: lknotein .72s cubic-bezier(.23,1,.32,1) forwards;
+  }
+  #lock .lknote:nth-child(1) { animation-delay: .55s; }
+  #lock .lknote:nth-child(2) { animation-delay: .78s; }
+  @keyframes lknotein { to { opacity: 1; transform: none; } }
+  #lock .lknicon {
+    flex: 0 0 auto;
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: grid; place-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  #lock .lknicon.msg { background: linear-gradient(180deg,#5ee07a,#22c04a); }
+  #lock .lknicon.rem { background: linear-gradient(180deg,#fff,#e9e9ee); }
+  #lock .lkntext { min-width: 0; flex: 1; }
+  #lock .lknhead {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-size: .58rem; letter-spacing: .09em; text-transform: uppercase;
+    color: rgba(255,255,255,.62);
+  }
+  #lock .lkntitle {
+    font-size: .9rem; font-weight: 600; color: #fff; margin-top: 1px;
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+  #lock .lknbody {
+    font-size: .84rem; line-height: 1.32; color: rgba(255,255,255,.86); margin-top: 1px;
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+  @media (max-height: 800px) {
+    #lock .lktime { font-size: clamp(2.4rem, 11vw, 3.2rem); }
+    #lock .lknotes { margin-top: 10px; }
+    #lock .lkprompt { margin-bottom: 14px; }
+  }
+  @media (max-height: 700px) {
+    #lock .lknote:nth-child(2) { display: none; }
+    #lock .lknotes { margin-top: 8px; }
+  }
+
   #lock .lkmid { text-align: center; width: 100%; }
   #lock .lkprompt {
     font-size: clamp(1rem, 4.2vw, 1.15rem);
@@ -1587,6 +1647,32 @@
     <div class="lktime" id="lkTime">00:00</div>
     <div class="lkdate" id="lkDate"></div>
   </div>
+    <div class="lknotes">
+      <div class="lknote">
+        <div class="lknicon rem">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="#ff5f57" stroke-width="2.4"/>
+            <circle cx="12" cy="12" r="3" fill="#ff5f57"/>
+          </svg>
+        </div>
+        <div class="lkntext">
+          <div class="lknhead"><span>Reminders</span><span>today</span></div>
+          <div class="lkntitle">Mihri&#351;ah turns 21</div>
+        </div>
+      </div>
+      <div class="lknote">
+        <div class="lknicon msg">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M12 4.6c-4.6 0-8.3 2.9-8.3 6.5 0 2 1.2 3.9 3 5.1-.2 1-.7 2.1-1.5 3 1.7-.3 3-.9 3.9-1.5 .9.2 1.9.4 2.9.4 4.6 0 8.3-2.9 8.3-6.5S16.6 4.6 12 4.6z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="lkntext">
+          <div class="lknhead"><span>Messages</span><span>now</span></div>
+          <div class="lkntitle">Youcef</div>
+          <div class="lknbody">you know the passcode, right?</div>
+        </div>
+      </div>
+    </div>
   <div class="lkmid">
     <p class="lkprompt">Enter Passcode</p>
     <div class="lkdots" id="lkDots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
