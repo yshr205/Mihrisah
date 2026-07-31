@@ -67,6 +67,53 @@
      The passcode is her own birthday. She already knows it. */
   html.locked, html.locked body { overflow: hidden; height: 100%; }
   html.locked #intro { animation-play-state: paused; }
+
+  /* shown only inside Instagram's cut-down browser, where sound and
+     video are unreliable. Points at the menu that escapes it. */
+  #iabtip {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 210;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px calc(11px + env(safe-area-inset-top, 0px));
+    background: rgba(28,22,36,.92);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-size: .78rem;
+    line-height: 1.4;
+    color: rgba(255,255,255,.92);
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity .5s ease, transform .55s cubic-bezier(.23,1,.32,1);
+  }
+  #iabtip.show { display: flex; }
+  #iabtip.in { opacity: 1; transform: none; }
+  #iabtip .iabarrow {
+    flex: 0 0 auto;
+    font-size: 1.05rem;
+    animation: iabnudge 1.9s ease-in-out infinite;
+  }
+  @keyframes iabnudge {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(3px, -3px); }
+  }
+  #iabtip b { font-weight: 700; color: #fff; }
+  #iabtip .iabx {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 2px 8px;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: rgba(255,255,255,.5);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
   #lock {
     position: fixed;
     inset: 0;
@@ -129,8 +176,7 @@
     transform: translateY(14px) scale(.97);
     animation: lknotein .72s cubic-bezier(.23,1,.32,1) forwards;
   }
-  #lock .lknote:nth-child(1) { animation-delay: .55s; }
-  #lock .lknote:nth-child(2) { animation-delay: .78s; }
+  #lock .lknote { animation-delay: .55s; }
   @keyframes lknotein { to { opacity: 1; transform: none; } }
   #lock .lknicon {
     flex: 0 0 auto;
@@ -140,7 +186,6 @@
     box-shadow: 0 1px 4px rgba(0,0,0,.3);
   }
   #lock .lknicon.msg { background: linear-gradient(180deg,#5ee07a,#22c04a); }
-  #lock .lknicon.rem { background: linear-gradient(180deg,#fff,#e9e9ee); }
   #lock .lkntext { min-width: 0; flex: 1; }
   #lock .lknhead {
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
@@ -161,7 +206,6 @@
     #lock .lkprompt { margin-bottom: 14px; }
   }
   @media (max-height: 700px) {
-    #lock .lknote:nth-child(2) { display: none; }
     #lock .lknotes { margin-top: 8px; }
   }
 
@@ -1635,9 +1679,19 @@
   }
 
 </style>
+<noscript><style>
+  html.locked, html.locked body { overflow: auto !important; height: auto !important; }
+  #lock, #iabtip { display: none !important; }
+  html.locked #intro { animation-play-state: running; }
+</style></noscript>
 </head>
 <body>
 
+<div id="iabtip" role="status">
+  <span class="iabarrow">&#8599;</span>
+  <span>For the music and the video, tap <b>&#183;&#183;&#183;</b> up there and choose <b>Open in browser</b>.</span>
+  <button class="iabx" id="iabx" type="button" aria-label="Dismiss">&#215;</button>
+</div>
 <div id="lock" role="dialog" aria-label="Enter passcode">
   <div class="lktop">
     <svg class="lkpad-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1648,18 +1702,6 @@
     <div class="lkdate" id="lkDate"></div>
   </div>
     <div class="lknotes">
-      <div class="lknote">
-        <div class="lknicon rem">
-          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" fill="none" stroke="#ff5f57" stroke-width="2.4"/>
-            <circle cx="12" cy="12" r="3" fill="#ff5f57"/>
-          </svg>
-        </div>
-        <div class="lkntext">
-          <div class="lknhead"><span>Reminders</span><span>today</span></div>
-          <div class="lkntitle">Mihri&#351;ah turns 21</div>
-        </div>
-      </div>
       <div class="lknote">
         <div class="lknicon msg">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -1693,6 +1735,104 @@
       <button class="key del" data-k="del" type="button" aria-label="Delete">delete</button>
   </div>
 </div>
+<script>
+(function(){
+  /* ================= her lock screen =================
+     Passcode 010805 — the day she was born. She knows it already.
+     Two safeguards: a hint after 2 wrong tries, the answer after 4.
+     She can never be locked out of her own birthday present.        */
+  (function () {
+    var lock = document.getElementById('lock');
+    if (!lock) { document.documentElement.classList.remove('locked'); return; }
+    var CODE = '010805';
+    var dots = document.getElementById('lkDots');
+    var hint = document.getElementById('lkHint');
+    var pad  = document.getElementById('lkPad');
+    var pips = dots ? dots.querySelectorAll('i') : [];
+    var buf = '', wrong = 0, done = false;
+
+    function clock() {
+      var d = new Date();
+      var h = d.getHours(), m = d.getMinutes();
+      var t = document.getElementById('lkTime');
+      var dt = document.getElementById('lkDate');
+      if (t) t.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+      if (dt) dt.textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+    clock(); setInterval(clock, 10000);
+
+    function tick(freq, vol) {
+      try {
+        var actx = window.__actx;
+        if (!actx || actx.state !== 'running') return;
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(0, actx.currentTime);
+        g.gain.linearRampToValueAtTime(vol, actx.currentTime + .005);
+        g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + .13);
+        o.connect(g); g.connect(actx.destination);
+        o.start(); o.stop(actx.currentTime + .15);
+      } catch (e) {}
+    }
+
+    function paint() {
+      for (var i = 0; i < pips.length; i++) pips[i].classList.toggle('on', i < buf.length);
+    }
+
+    function say(msg) { if (hint) { hint.textContent = msg; hint.classList.add('show'); } }
+
+    function open_() {
+      done = true;
+      tick(880, .05);
+      setTimeout(function () { tick(1320, .045); }, 90);
+      lock.classList.add('open');
+      document.documentElement.classList.remove('locked');
+      setTimeout(function () { if (lock && lock.parentNode) lock.parentNode.removeChild(lock); }, 900);
+    }
+
+    function check() {
+      if (buf === CODE) { paint(); setTimeout(open_, 190); return; }
+      wrong++;
+      if (dots) {
+        dots.classList.remove('bad');
+        void dots.offsetWidth;
+        dots.classList.add('bad');
+      }
+      tick(150, .05);
+      if (wrong === 1) say('not quite. try again.');
+      else if (wrong === 2) say('hint: it is a date. six digits.');
+      else if (wrong === 3) say('hint: the day you were born.');
+      else say('day, month, year. 01 · 08 · 05');
+      setTimeout(function () { buf = ''; paint(); }, 430);
+    }
+
+    function press(k) {
+      if (done) return;
+      if (k === 'del') { buf = buf.slice(0, -1); paint(); tick(320, .03); return; }
+      if (buf.length >= 6) return;
+      buf += k;
+      paint();
+      tick(520 + buf.length * 40, .035);
+      if (buf.length === 6) setTimeout(check, 180);
+    }
+
+    if (pad) {
+      pad.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-k]') : null;
+        if (b) { e.preventDefault(); press(b.getAttribute('data-k')); }
+      });
+    }
+    // a real keyboard works too, for anyone on a laptop
+    addEventListener('keydown', function (e) {
+      if (done) return;
+      if (e.key >= '0' && e.key <= '9') press(e.key);
+      else if (e.key === 'Backspace') press('del');
+    });
+    // last resort: if she has been staring at it for two minutes, let her in
+    setTimeout(function () { if (!done) say('day, month, year. 01 · 08 · 05'); }, 120000);
+  })();
+})();
+</script>
 <div id="intro"><span>For Mihrişah</span></div>
 <div id="tocurtain"></div>
 <button id="musicBtn" aria-label="toggle music">♪</button>
@@ -2468,6 +2608,7 @@
         voiceLim.release.value = .18;
         voiceBus.connect(voiceLim);
         voiceLim.connect(actx.destination);
+        window.__actx = actx;
         loopStart = actx.currentTime + .3;
         evIdx = 0;
         scheduler();
@@ -3156,99 +3297,6 @@
 
 })();
 
-  /* ================= her lock screen =================
-     Passcode 010805 — the day she was born. She knows it already.
-     Two safeguards: a hint after 2 wrong tries, the answer after 4.
-     She can never be locked out of her own birthday present.        */
-  (function () {
-    var lock = document.getElementById('lock');
-    if (!lock) { document.documentElement.classList.remove('locked'); return; }
-    var CODE = '010805';
-    var dots = document.getElementById('lkDots');
-    var hint = document.getElementById('lkHint');
-    var pad  = document.getElementById('lkPad');
-    var pips = dots ? dots.querySelectorAll('i') : [];
-    var buf = '', wrong = 0, done = false;
-
-    function clock() {
-      var d = new Date();
-      var h = d.getHours(), m = d.getMinutes();
-      var t = document.getElementById('lkTime');
-      var dt = document.getElementById('lkDate');
-      if (t) t.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-      if (dt) dt.textContent = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    }
-    clock(); setInterval(clock, 10000);
-
-    function tick(freq, vol) {
-      try {
-        if (!actx || actx.state !== 'running') return;
-        var o = actx.createOscillator(), g = actx.createGain();
-        o.type = 'sine'; o.frequency.value = freq;
-        g.gain.setValueAtTime(0, actx.currentTime);
-        g.gain.linearRampToValueAtTime(vol, actx.currentTime + .005);
-        g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + .13);
-        o.connect(g); g.connect(actx.destination);
-        o.start(); o.stop(actx.currentTime + .15);
-      } catch (e) {}
-    }
-
-    function paint() {
-      for (var i = 0; i < pips.length; i++) pips[i].classList.toggle('on', i < buf.length);
-    }
-
-    function say(msg) { if (hint) { hint.textContent = msg; hint.classList.add('show'); } }
-
-    function open_() {
-      done = true;
-      tick(880, .05);
-      setTimeout(function () { tick(1320, .045); }, 90);
-      lock.classList.add('open');
-      document.documentElement.classList.remove('locked');
-      setTimeout(function () { if (lock && lock.parentNode) lock.parentNode.removeChild(lock); }, 900);
-    }
-
-    function check() {
-      if (buf === CODE) { paint(); setTimeout(open_, 190); return; }
-      wrong++;
-      if (dots) {
-        dots.classList.remove('bad');
-        void dots.offsetWidth;
-        dots.classList.add('bad');
-      }
-      tick(150, .05);
-      if (wrong === 1) say('not quite. try again.');
-      else if (wrong === 2) say('hint: it is a date. six digits.');
-      else if (wrong === 3) say('hint: the day you were born.');
-      else say('day, month, year. 01 · 08 · 05');
-      setTimeout(function () { buf = ''; paint(); }, 430);
-    }
-
-    function press(k) {
-      if (done) return;
-      if (k === 'del') { buf = buf.slice(0, -1); paint(); tick(320, .03); return; }
-      if (buf.length >= 6) return;
-      buf += k;
-      paint();
-      tick(520 + buf.length * 40, .035);
-      if (buf.length === 6) setTimeout(check, 180);
-    }
-
-    if (pad) {
-      pad.addEventListener('click', function (e) {
-        var b = e.target.closest ? e.target.closest('[data-k]') : null;
-        if (b) { e.preventDefault(); press(b.getAttribute('data-k')); }
-      });
-    }
-    // a real keyboard works too, for anyone on a laptop
-    addEventListener('keydown', function (e) {
-      if (done) return;
-      if (e.key >= '0' && e.key <= '9') press(e.key);
-      else if (e.key === 'Backspace') press('del');
-    });
-    // last resort: if she has been staring at it for two minutes, let her in
-    setTimeout(function () { if (!done) say('day, month, year. 01 · 08 · 05'); }, 120000);
-  })();
 
 
   // touch the flowers and petals come loose
@@ -3291,6 +3339,31 @@
     }
     bq.addEventListener('click', shed);
     bq.addEventListener('touchstart', shed, { passive: true });
+  })();
+
+
+  // Instagram opens links in its own stripped-down browser: Web Audio is flaky,
+  // video is worse, and it drops frames. Point the way out, only when she is in it.
+  (function () {
+    var ua = navigator.userAgent || '';
+    var inApp = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|Line\/|Snapchat|TikTok|MicroMessenger|Twitter/i.test(ua);
+    var tip = document.getElementById('iabtip');
+    if (!tip) return;
+    if (!inApp) { tip.parentNode && tip.parentNode.removeChild(tip); return; }
+    var isAndroid = /Android/i.test(ua);
+    if (isAndroid) {
+      tip.querySelector('span:nth-of-type(2)').innerHTML =
+        'For the music and the video, tap <b>\u22ee</b> up there and choose <b>Open in browser</b>.';
+    }
+    tip.classList.add('show');
+    setTimeout(function () { tip.classList.add('in'); }, 900);
+    function bye() {
+      tip.classList.remove('in');
+      setTimeout(function () { if (tip.parentNode) tip.parentNode.removeChild(tip); }, 600);
+    }
+    var x = document.getElementById('iabx');
+    if (x) x.addEventListener('click', bye);
+    setTimeout(bye, 22000);
   })();
 
 </script>
